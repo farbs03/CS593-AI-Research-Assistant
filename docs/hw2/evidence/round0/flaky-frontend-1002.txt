@@ -1,0 +1,13 @@
+$ node C:\Users\cgera\Coding\Classes\CS593-ASE\ai-research-assistant\frontend\node_modules\vitest\vitest.mjs run --sequence.shuffle --sequence.seed=1002
+exit code: 0
+
+
+ RUN  v5.1.0 C:/Users/cgera/Coding/Classes/CS593-ASE/ai-research-assistant/frontend
+      Running tests with seed "1002"
+
+
+ Test Files  7 passed (7)
+      Tests  98 passed (98)
+   Start at  12:14:52
+   Duration  9.83s (environment 70%, tests 12%, setup 12%, import 5%)
+

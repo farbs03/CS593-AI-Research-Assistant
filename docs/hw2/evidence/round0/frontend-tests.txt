@@ -1,0 +1,44 @@
+$ node C:\Users\cgera\Coding\Classes\CS593-ASE\ai-research-assistant\frontend\node_modules\vitest\vitest.mjs run --coverage --coverage.reportsDirectory=C:\Users\cgera\Coding\Classes\CS593-ASE\ai-research-assistant\docs\hw2\evidence\round0\frontend-coverage --reporter=default --reporter=junit --outputFile.junit=C:\Users\cgera\Coding\Classes\CS593-ASE\ai-research-assistant\docs\hw2\evidence\round0\frontend-junit.xml
+exit code: 0
+
+
+ RUN  v5.1.0 C:/Users/cgera/Coding/Classes/CS593-ASE/ai-research-assistant/frontend
+      Coverage enabled with v8
+
+ ✓ src/api/client.test.ts (16 tests) 15ms
+ ✓ src/components/PaperCard.test.tsx (15 tests) 266ms
+ ✓ src/library.test.tsx (12 tests) 821ms
+ ✓ src/App.test.tsx (3 tests) 765ms
+   ✓ App (3)
+     ✓ saving a search result updates the library count in the nav 360ms
+ ✓ src/pages/SearchPage.test.tsx (13 tests) 1364ms
+   ✓ SearchPage (13)
+     ✓ searches on submit, puts the query in the URL and lists results 347ms
+ ✓ src/pages/LibraryPage.test.tsx (19 tests) 2029ms
+ ✓ src/pages/PaperPage.test.tsx (20 tests) 2376ms
+   ✓ PaperPage chat (11)
+     ✓ asks a typed question, shows pending state, then the answer 537ms
+     ✓ Enter submits but Shift+Enter inserts a newline 371ms
+
+ Test Files  7 passed (7)
+      Tests  98 passed (98)
+   Start at  12:13:48
+   Duration  10.23s (environment 68%, tests 14%, setup 13%, import 5%, worker 1%)
+
+JUNIT report written to C:/Users/cgera/Coding/Classes/CS593-ASE/ai-research-assistant/docs/hw2/evidence/round0/frontend-junit.xml
+ % Coverage report from v8
+------------------|---------|----------|---------|---------|-------------------
+File              | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+------------------|---------|----------|---------|---------|-------------------
+All files         |     100 |    98.12 |     100 |     100 |                   
+ src/pages        |     100 |    97.58 |     100 |     100 |                   
+  LibraryPage.tsx |     100 |    96.66 |     100 |     100 | 31                
+  SearchPage.tsx  |     100 |    95.34 |     100 |     100 | 38,101            
+------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 234/234 )
+Branches     : 98.12% ( 157/160 )
+Functions    : 100% ( 80/80 )
+Lines        : 100% ( 214/214 )
+================================================================================

@@ -1,0 +1,72 @@
+{
+  "round": "round0",
+  "backend": {
+    "exit_code": 0,
+    "total": 168,
+    "passed": 165,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xfailed": 3,
+    "line_pct": 99.7,
+    "branch_pct": 100.0,
+    "combined_pct": 99.8
+  },
+  "frontend": {
+    "exit_code": 0,
+    "total": 98,
+    "passed": 98,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "xfailed": 0,
+    "lines_pct": 100,
+    "branches_pct": 98.12,
+    "functions_pct": 100,
+    "statements_pct": 100
+  },
+  "e2e": {
+    "exit_code": 0,
+    "passed": 8,
+    "failed": 0,
+    "flaky": 0,
+    "skipped": 0
+  },
+  "flakiness": {
+    "backend": {
+      "runs": 3,
+      "non_zero_exits": 0
+    },
+    "frontend": {
+      "runs": 3,
+      "non_zero_exits": 0
+    }
+  },
+  "mutation": {
+    "visible": {
+      "killed": 19,
+      "total": 19,
+      "score": 100.0
+    },
+    "held-out": {
+      "killed": 18,
+      "total": 18,
+      "score": 100.0
+    },
+    "all": {
+      "killed": 37,
+      "total": 37,
+      "score": 100.0
+    },
+    "backend": {
+      "killed": 26,
+      "total": 26,
+      "score": 100.0
+    },
+    "frontend": {
+      "killed": 11,
+      "total": 11,
+      "score": 100.0
+    }
+  }
+}

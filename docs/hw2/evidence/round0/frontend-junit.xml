@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="98" failures="0" errors="0" time="7.6360577">
+    <testsuite name="src/App.test.tsx" timestamp="2026-11-04T17:13:58.374Z" hostname="Chris-Laptop" tests="3" failures="0" errors="0" skipped="0" time="0.7645446">
+        <testcase classname="src/App.test.tsx" name="App &gt; starts on the search page with navigation and a library count" time="0.1443272">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="App &gt; navigates between pages and scrolls to the top on each navigation" time="0.2591551">
+        </testcase>
+        <testcase classname="src/App.test.tsx" name="App &gt; saving a search result updates the library count in the nav" time="0.3595051">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/api/client.test.ts" timestamp="2026-11-04T17:13:58.379Z" hostname="Chris-Laptop" tests="16" failures="0" errors="0" skipped="0" time="0.0152373">
+        <testcase classname="src/api/client.test.ts" name="request error handling &gt; returns parsed JSON on success" time="0.0055132">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="request error handling &gt; returns undefined for 204 No Content" time="0.0005111">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="request error handling &gt; uses the FastAPI &quot;detail&quot; string as the error message" time="0.0010777">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="request error handling &gt; falls back to status and status text when detail is not a string" time="0.000536">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="request error handling &gt; falls back to status and status text for non-JSON error bodies" time="0.0004032">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="request error handling &gt; reports an unreachable server with a helpful message" time="0.0003554">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="endpoints &gt; search encodes the query and default limit" time="0.0005307">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="endpoints &gt; search passes a custom limit" time="0.0004828">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="endpoints &gt; listPapers and getPaper use GET" time="0.000515">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="endpoints &gt; savePaper POSTs the paper as JSON" time="0.0006032">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="endpoints &gt; deletePaper sends DELETE" time="0.0003252">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="endpoints &gt; uploadPaper sends the file as multipart form data under &quot;file&quot;" time="0.0013048">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="endpoints &gt; pdfUrl builds the stored-PDF URL without fetching" time="0.0002911">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="endpoints &gt; summarize POSTs with regenerate=false by default and true on request" time="0.0004574">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="endpoints &gt; getChat, ask and clearChat hit the chat endpoint" time="0.000474">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="mock sanity &gt; unmocked requests surface as errors" time="0.0003588">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/PaperCard.test.tsx" timestamp="2026-11-04T17:13:58.381Z" hostname="Chris-Laptop" tests="15" failures="0" errors="0" skipped="0" time="0.2663364">
+        <testcase classname="src/components/PaperCard.test.tsx" name="PaperCard &gt; shows title, authors, year and source" time="0.1067625">
+        </testcase>
+        <testcase classname="src/components/PaperCard.test.tsx" name="PaperCard &gt; labels source arxiv as &quot;arXiv&quot;" time="0.0029158">
+        </testcase>
+        <testcase classname="src/components/PaperCard.test.tsx" name="PaperCard &gt; labels source upload as &quot;Uploaded PDF&quot;" time="0.0020193">
+        </testcase>
+        <testcase classname="src/components/PaperCard.test.tsx" name="PaperCard &gt; labels source semantic_scholar as &quot;Semantic Scholar&quot;" time="0.001929">
+        </testcase>
+        <testcase classname="src/components/PaperCard.test.tsx" name="PaperCard &gt; title is plain text without titleHref and a link with it" time="0.0247879">
+        </testcase>
+        <testcase classname="src/components/PaperCard.test.tsx" name="PaperCard &gt; shows at most six authors and counts the rest" time="0.0029873">
+        </testcase>
+        <testcase classname="src/components/PaperCard.test.tsx" name="PaperCard &gt; shows exactly six authors without &quot;more&quot;" time="0.0017419">
+        </testcase>
+        <testcase classname="src/components/PaperCard.test.tsx" name="PaperCard &gt; handles missing authors, year and abstract" time="0.0021018">
+        </testcase>
+        <testcase classname="src/components/PaperCard.test.tsx" name="PaperCard &gt; treats an empty abstract as missing" time="0.0014888">
+        </testcase>
+        <testcase classname="src/components/PaperCard.test.tsx" name="PaperCard &gt; shows a short abstract in full with no toggle" time="0.0020259">
+        </testcase>
+        <testcase classname="src/components/PaperCard.test.tsx" name="PaperCard &gt; truncates long abstracts at 420 chars and toggles the full text" time="0.10047">
+        </testcase>
+        <testcase classname="src/components/PaperCard.test.tsx" name="PaperCard &gt; trims trailing whitespace before the ellipsis" time="0.0025147">
+        </testcase>
+        <testcase classname="src/components/PaperCard.test.tsx" name="PaperCard &gt; links to the paper page and PDF in a new tab" time="0.0063162">
+        </testcase>
+        <testcase classname="src/components/PaperCard.test.tsx" name="PaperCard &gt; omits links that are not available" time="0.0016726">
+        </testcase>
+        <testcase classname="src/components/PaperCard.test.tsx" name="PaperCard &gt; renders custom actions and badges" time="0.0049741">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/library.test.tsx" timestamp="2026-11-04T17:13:58.383Z" hostname="Chris-Laptop" tests="12" failures="0" errors="0" skipped="0" time="0.8208357">
+        <testcase classname="src/library.test.tsx" name="LibraryProvider &gt; loads the library on mount" time="0.0960819">
+        </testcase>
+        <testcase classname="src/library.test.tsx" name="LibraryProvider &gt; exposes load errors and stops loading" time="0.0757309">
+        </testcase>
+        <testcase classname="src/library.test.tsx" name="LibraryProvider &gt; refresh reloads papers and clears a previous error" time="0.0812876">
+        </testcase>
+        <testcase classname="src/library.test.tsx" name="LibraryProvider &gt; save adds the new paper to the front of the list" time="0.0788378">
+        </testcase>
+        <testcase classname="src/library.test.tsx" name="LibraryProvider &gt; saving a paper that is already listed does not duplicate it" time="0.0667976">
+        </testcase>
+        <testcase classname="src/library.test.tsx" name="LibraryProvider &gt; save failure propagates and leaves the list unchanged" time="0.071974">
+        </testcase>
+        <testcase classname="src/library.test.tsx" name="LibraryProvider &gt; upload adds the uploaded paper" time="0.076813">
+        </testcase>
+        <testcase classname="src/library.test.tsx" name="LibraryProvider &gt; remove deletes the paper and drops it from the list" time="0.079285">
+        </testcase>
+        <testcase classname="src/library.test.tsx" name="LibraryProvider &gt; remove failure keeps the paper" time="0.0791518">
+        </testcase>
+        <testcase classname="src/library.test.tsx" name="LibraryProvider &gt; savedIdFor maps external ids to saved paper ids" time="0.0775304">
+        </testcase>
+        <testcase classname="src/library.test.tsx" name="LibraryProvider &gt; renders its children" time="0.0311694">
+        </testcase>
+        <testcase classname="src/library.test.tsx" name="useLibrary &gt; throws outside of a LibraryProvider" time="0.0040785">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/LibraryPage.test.tsx" timestamp="2026-11-04T17:13:58.384Z" hostname="Chris-Laptop" tests="19" failures="0" errors="0" skipped="0" time="2.0289814">
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; shows an empty-library message with a link to search" time="0.1490188">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; shows a load error instead of the empty message" time="0.0131487">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; lists saved papers with links and abstract-only badges" time="0.039884">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; filters by title" time="0.2021839">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; filters by author (case-insensitive)" time="0.1487902">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; filters by abstract" time="0.2691713">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; filters by surrounding whitespace" time="0.1842364">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; filter with no matches shows 0 of N" time="0.2643926">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; uploads a chosen PDF and opens the new paper" time="0.1015858">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; the Upload PDF button opens the file picker" time="0.0398614">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; accepts a .pdf file even without a PDF mime type" time="0.0302896">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; rejects non-PDF files without uploading" time="0.0800114">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; shows the server error when an upload fails and stays on the page" time="0.0483963">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; clears a previous upload error on the next attempt" time="0.0929153">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; uploads a PDF dropped on the drop zone" time="0.0377561">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; ignores a drop without files" time="0.0157862">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; removes a paper after confirmation" time="0.123954">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; keeps the paper when removal is cancelled" time="0.0958606">
+        </testcase>
+        <testcase classname="src/pages/LibraryPage.test.tsx" name="LibraryPage &gt; alerts when removal fails and keeps the paper" time="0.0895469">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/PaperPage.test.tsx" timestamp="2026-11-04T17:13:58.387Z" hostname="Chris-Laptop" tests="20" failures="0" errors="0" skipped="0" time="2.3760693">
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage details &gt; shows a loading message, then the paper" time="0.1331511">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage details &gt; renders metadata, abstract and links" time="0.0290693">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage details &gt; handles a paper with minimal metadata" time="0.0171918">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage details &gt; warns when only the abstract is available" time="0.0112219">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage details &gt; shows an error for a missing paper" time="0.02277">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage details &gt; shows an error for a non-numeric paper id" time="0.0144299">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage summary &gt; summarizes on request, renders markdown and refreshes the library" time="0.1067842">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage summary &gt; shows a cached summary and regenerates it" time="0.0985072">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage summary &gt; shows summary errors and allows retry" time="0.1595672">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage chat &gt; shows suggested questions when there is no history" time="0.0473079">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage chat &gt; loads and renders existing chat history" time="0.0555183">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage chat &gt; shows an error if chat history cannot be loaded" time="0.0323031">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage chat &gt; asks a typed question, shows pending state, then the answer" time="0.5369133">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage chat &gt; clicking a suggested question asks it" time="0.069477">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage chat &gt; Enter submits but Shift+Enter inserts a newline" time="0.3709753">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage chat &gt; does not send blank questions" time="0.1157662">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage chat &gt; restores the question and shows the error when asking fails" time="0.1356239">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage chat &gt; appends follow-up answers after earlier messages" time="0.2929443">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage chat &gt; clears the history after confirmation" time="0.0600373">
+        </testcase>
+        <testcase classname="src/pages/PaperPage.test.tsx" name="PaperPage chat &gt; keeps the history when clearing is cancelled" time="0.0631623">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/pages/SearchPage.test.tsx" timestamp="2026-11-04T17:13:58.389Z" hostname="Chris-Laptop" tests="13" failures="0" errors="0" skipped="0" time="1.364053">
+        <testcase classname="src/pages/SearchPage.test.tsx" name="SearchPage &gt; shows example searches before any query" time="0.1370479">
+        </testcase>
+        <testcase classname="src/pages/SearchPage.test.tsx" name="SearchPage &gt; searches on submit, puts the query in the URL and lists results" time="0.3472179">
+        </testcase>
+        <testcase classname="src/pages/SearchPage.test.tsx" name="SearchPage &gt; runs the query from the URL on load" time="0.0249814">
+        </testcase>
+        <testcase classname="src/pages/SearchPage.test.tsx" name="SearchPage &gt; clicking an example runs that search" time="0.0481322">
+        </testcase>
+        <testcase classname="src/pages/SearchPage.test.tsx" name="SearchPage &gt; does not search for a whitespace-only query" time="0.1720697">
+        </testcase>
+        <testcase classname="src/pages/SearchPage.test.tsx" name="SearchPage &gt; labels arXiv results and shows an empty-result hint" time="0.0149492">
+        </testcase>
+        <testcase classname="src/pages/SearchPage.test.tsx" name="SearchPage &gt; shows a loading state while searching" time="0.0324882">
+        </testcase>
+        <testcase classname="src/pages/SearchPage.test.tsx" name="SearchPage &gt; shows the server error when search fails" time="0.0147613">
+        </testcase>
+        <testcase classname="src/pages/SearchPage.test.tsx" name="SearchPage &gt; recovers from an error on the next search" time="0.1918064">
+        </testcase>
+        <testcase classname="src/pages/SearchPage.test.tsx" name="SearchPage &gt; saves a result to the library and then links to it" time="0.1642278">
+        </testcase>
+        <testcase classname="src/pages/SearchPage.test.tsx" name="SearchPage &gt; shows a save error inline and lets the user retry" time="0.1445987">
+        </testcase>
+        <testcase classname="src/pages/SearchPage.test.tsx" name="SearchPage &gt; marks results the server reports as already saved" time="0.0247596">
+        </testcase>
+        <testcase classname="src/pages/SearchPage.test.tsx" name="SearchPage &gt; marks results that are in the local library even if the server did not" time="0.0452841">
+        </testcase>
+    </testsuite>
+</testsuites>

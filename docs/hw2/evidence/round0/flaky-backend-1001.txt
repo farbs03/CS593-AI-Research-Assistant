@@ -1,0 +1,11 @@
+$ C:\Users\cgera\Coding\Classes\CS593-ASE\ai-research-assistant\backend\.venv\Scripts\python.exe -m pytest -q -p randomly -p no:cacheprovider --randomly-seed=1001
+exit code: 0
+
+...........................................................x............ [ 42%]
+....................................x................x.................. [ 85%]
+........................                                                 [100%]
+=========================== short test summary info ===========================
+XFAIL tests/test_pdf.py::test_heuristic_metadata_year_from_standard_pdf_creation_date - APP BUG: YEAR_RE needs word boundaries, so the standard PDF date format 'D:YYYYMMDDHHmmSS' (what real PDFs store) never matches; the creationDate fallback is dead.
+XFAIL tests/test_api_papers.py::test_upload_corrupt_pdf_returns_400 - APP BUG: heuristic_metadata opens the PDF with pymupdf outside the PDFError wrapper, so a corrupt file that starts with %PDF raises pymupdf.FileDataError, which upload_paper does not catch -> 500 Internal Server Error instead of a 400.
+XFAIL tests/test_api_papers.py::test_save_with_corrupt_downloaded_pdf_does_not_attach_it - APP BUG: _store_pdf writes the file and sets pdf_path before extract_text runs; if the downloaded 'PDF' is corrupt the save falls back to abstract-only but keeps has_pdf=True, pointing at a broken file that is left on disk.
+165 passed, 3 xfailed in 10.30s
