@@ -9,3 +9,12 @@ backend/data/
 # node
 node_modules/
 dist/
+
+# test artifacts
+.coverage
+coverage.json
+htmlcov/
+.pytest_cache/
+test-results/
+playwright-report/
+coverage/

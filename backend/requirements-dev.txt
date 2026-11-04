@@ -1,0 +1,5 @@
+-r requirements.txt
+pytest==9.2.0
+pytest-cov==7.1.0
+respx==0.23.1
+pytest-randomly==5.0.0
