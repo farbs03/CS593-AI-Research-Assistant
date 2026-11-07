@@ -1,0 +1,121 @@
+baseline (unparsed app) OK; running 100 mutants of 424 sites
+A001 visible  survived backend/app/config.py:7 stmt_to_pass
+A002 held-out killed   backend/app/config.py:9 binop
+A003 visible  survived backend/app/config.py:9 constant
+A004 held-out survived backend/app/config.py:10 constant
+A005 visible  survived backend/app/config.py:11 constant
+A006 held-out killed   backend/app/config.py:14 constant
+A007 visible  survived backend/app/config.py:15 constant
+A008 held-out survived backend/app/config.py:21 constant
+A009 visible  survived backend/app/db.py:13 stmt_to_pass
+A010 held-out survived backend/app/db.py:7 constant
+A011 visible  survived backend/app/db.py:7 constant
+A012 held-out killed   backend/app/llm.py:24 return_none
+A013 visible  killed   backend/app/llm.py:60 return_none
+A014 held-out killed   backend/app/llm.py:22 compare
+A015 visible  killed   backend/app/llm.py:53 drop_not
+A016 held-out killed   backend/app/llm.py:61 constant
+A017 visible  killed   backend/app/llm.py:62 constant
+A018 held-out killed   backend/app/llm.py:54 constant
+A019 visible  survived backend/app/llm.py:49 constant
+A020 held-out killed   backend/app/llm.py:82 constant
+A021 visible  killed   backend/app/llm.py:64 constant
+A022 held-out killed   backend/app/main.py:27 stmt_to_pass
+A023 visible  killed   backend/app/main.py:34 return_none
+A024 held-out killed   backend/app/main.py:34 constant
+A025 visible  killed   backend/app/main.py:23 constant
+A026 held-out killed   backend/app/models.py:49 constant
+A027 visible  survived backend/app/models.py:62 constant
+A028 held-out killed   backend/app/pdf.py:21 return_none
+A029 visible  killed   backend/app/pdf.py:35 constant
+A030 held-out killed   backend/app/pdf.py:83 constant
+A031 visible  killed   backend/app/pdf.py:55 constant
+A032 held-out killed   backend/app/pdf.py:73 negate_cond
+A033 visible  killed   backend/app/pdf.py:51 constant
+A034 held-out killed   backend/app/pdf.py:61 constant
+A035 visible  killed   backend/app/pdf.py:84 constant
+A036 held-out killed   backend/app/pdf.py:58 constant
+A037 visible  killed   backend/app/pdf.py:70 constant
+A038 held-out killed   backend/app/pdf.py:46 constant
+A039 visible  killed   backend/app/pdf.py:59 constant
+A040 held-out killed   backend/app/pdf.py:70 constant
+A041 visible  survived backend/app/pdf.py:70 constant
+A042 held-out killed   backend/app/pdf.py:73 constant
+A043 visible  killed   backend/app/pdf.py:73 constant
+A044 held-out killed   backend/app/pdf.py:74 constant
+A045 visible  killed   backend/app/pdf.py:74 constant
+A046 held-out killed   backend/app/routes/ai.py:29 negate_cond
+A047 visible  killed   backend/app/routes/ai.py:43 return_none
+A048 held-out killed   backend/app/routes/ai.py:53 negate_cond
+A049 visible  killed   backend/app/routes/ai.py:66 stmt_to_pass
+A050 held-out killed   backend/app/routes/ai.py:29 boolop
+A051 visible  killed   backend/app/routes/ai.py:30 return_none
+A052 held-out killed   backend/app/routes/ai.py:26 constant
+A053 visible  killed   backend/app/routes/ai.py:48 constant
+A054 held-out killed   backend/app/routes/ai.py:10 constant
+A055 visible  killed   backend/app/routes/ai.py:29 drop_not
+A056 held-out killed   backend/app/routes/ai.py:72 constant
+A057 visible  survived backend/app/routes/ai.py:10 constant
+A058 held-out killed   backend/app/routes/ai.py:54 constant
+A059 visible  killed   backend/app/routes/papers.py:61 stmt_to_pass
+A060 held-out killed   backend/app/routes/papers.py:63 return_none
+A061 visible  killed   backend/app/routes/papers.py:71 negate_cond
+A062 held-out killed   backend/app/routes/papers.py:94 stmt_to_pass
+A063 visible  killed   backend/app/routes/papers.py:97 return_none
+A064 held-out killed   backend/app/routes/papers.py:103 negate_cond
+A065 visible  killed   backend/app/routes/papers.py:111 stmt_to_pass
+A066 held-out killed   backend/app/routes/papers.py:22 drop_not
+A067 visible  killed   backend/app/routes/papers.py:66 constant
+A068 held-out killed   backend/app/routes/papers.py:32 constant
+A069 visible  killed   backend/app/routes/papers.py:105 binop
+A070 held-out killed   backend/app/routes/papers.py:104 constant
+A071 visible  killed   backend/app/routes/papers.py:105 constant
+A072 held-out killed   backend/app/routes/papers.py:50 compare
+A073 visible  killed   backend/app/search.py:17 constant
+A074 held-out killed   backend/app/search.py:125 return_none
+A075 visible  killed   backend/app/search.py:18 constant
+A076 held-out killed   backend/app/search.py:93 stmt_to_pass
+A077 visible  killed   backend/app/search.py:108 constant
+A078 held-out killed   backend/app/search.py:108 constant
+A079 visible  survived backend/app/search.py:108 constant
+A080 held-out killed   backend/app/search.py:108 constant
+A081 visible  survived backend/app/search.py:108 constant
+A082 held-out survived backend/app/search.py:109 constant
+A083 visible  killed   backend/app/search.py:121 negate_cond
+A084 held-out killed   backend/app/search.py:39 constant
+A085 visible  killed   backend/app/search.py:42 compare
+A086 held-out killed   backend/app/search.py:79 stmt_to_pass
+A087 visible  killed   backend/app/search.py:49 constant
+A088 held-out killed   backend/app/search.py:72 constant
+A089 visible  killed   backend/app/search.py:90 constant
+A090 held-out survived backend/app/search.py:40 constant
+A091 visible  killed   backend/app/search.py:50 constant
+A092 held-out survived backend/app/search.py:71 constant
+A093 visible  killed   backend/app/search.py:76 constant
+A094 held-out killed   backend/app/search.py:58 boolop
+A095 visible  killed   backend/app/search.py:91 constant
+A096 held-out killed   backend/app/search.py:99 negate_cond
+A097 visible  killed   backend/app/search.py:50 constant
+A098 held-out killed   backend/app/search.py:100 constant
+A099 visible  killed   backend/app/search.py:98 constant
+A100 held-out killed   backend/app/search.py:57 constant
+{
+  "seed": 593,
+  "population": 424,
+  "sampled": 100,
+  "visible": {
+    "killed": 38,
+    "total": 50,
+    "score": 76.0
+  },
+  "held-out": {
+    "killed": 44,
+    "total": 50,
+    "score": 88.0
+  },
+  "all": {
+    "killed": 82,
+    "total": 100,
+    "score": 82.0
+  }
+}

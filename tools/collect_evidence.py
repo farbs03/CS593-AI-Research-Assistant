@@ -55,6 +55,24 @@ def junit_counts(path: Path) -> dict:
             "failed": failures, "errors": errors, "skipped": skipped, "xfailed": xfailed}
 
 
+def stryker_summary(path: Path) -> dict:
+    """Mutation score from a Stryker JSON report, split into visible (odd id) / held-out (even id).
+
+    Score = detected / (detected + undetected), where detected = Killed + Timeout and
+    undetected = Survived + NoCoverage (Stryker's own definition, ignoring compile errors).
+    """
+    report = json.loads(path.read_text(encoding="utf-8"))
+    rows = [(int(m["id"]), m["status"]) for f in report["files"].values() for m in f["mutants"]]
+    out = {}
+    for vis in ("visible", "held-out", "all"):
+        sel = [s for i, s in rows if vis == "all" or (i % 2 == 1) == (vis == "visible")]
+        detected = sum(s in ("Killed", "Timeout") for s in sel)
+        valid = detected + sum(s in ("Survived", "NoCoverage") for s in sel)
+        out[vis] = {"killed": detected, "total": valid, "score": round(100 * detected / valid, 1) if valid else None}
+    out["status_counts"] = {s: sum(1 for _, x in rows if x == s) for s in sorted({x for _, x in rows})}
+    return out
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("round")
@@ -122,6 +140,17 @@ def main() -> None:
         mfile = out / "mutation.json"
         if mfile.exists():
             summary["mutation"] = json.loads(mfile.read_text())["summary"]
+
+    # --- Tool-generated mutation tier (backend AST sample + StrykerJS) ----------------------------
+    if not args.skip_mutation:
+        run([str(PY), str(ROOT / "tools" / "ast_mutation.py"), "--out", str(out), "--n", "100"],
+            ROOT, out / "mutation-ast-run.txt")
+        if (out / "mutation-ast.json").exists():
+            summary["mutation_ast"] = json.loads((out / "mutation-ast.json").read_text())["summary"]
+        run(["node", str(NODE_BIN / "@stryker-mutator" / "core" / "bin" / "stryker.js"), "run",
+             "--reporters", "clear-text,html,json"], FRONTEND, out / "stryker-run.txt", env={"STRYKER_OUT": str(out)})
+        if (out / "stryker.json").exists():
+            summary["mutation_stryker"] = stryker_summary(out / "stryker.json")
 
     (out / "summary.json").write_text(json.dumps(summary, indent=2))
     print(json.dumps(summary, indent=2))
