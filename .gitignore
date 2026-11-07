@@ -18,3 +18,9 @@ htmlcov/
 test-results/
 playwright-report/
 coverage/
+
+# HW2 report latex
+docs/hw2/report-src/
+# HW2 report (submitted separately)
+docs/hw2/HW2_Report.docx
+docs/hw2/HW2_Report.pdf

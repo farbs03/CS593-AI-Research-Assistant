@@ -92,7 +92,7 @@ Open http://localhost:5173.
 
 The test suite was generated and then improved over three rounds by a coding agent, for CS593 HW2. The prompts, evaluation and results are in [`docs/hw2/`](docs/hw2/).
 
-No test calls a real LLM or paper-search API, and no test touches `backend/data/`.
+No test calls a real LLM or paper-search API, and no test touches `backend/data/`. `backend/tests/_safety.py` is imported first by `conftest.py` and points the LLM and search settings at dummy values before the app loads, so a real key in `backend/.env` is never used.
 
 | Layer | Framework | Location |
 | --- | --- | --- |
@@ -141,6 +141,8 @@ python tools/fault_injection.py --out <dir>   # 37 hand-written faults (tools/mu
 python tools/ast_mutation.py --out <dir>      # 100 tool-generated backend mutants (fixed seed)
 cd frontend && npm run mutation               # StrykerJS on the frontend (reports/mutation/)
 ```
+
+`tools/ast_mutation.py` finds 424 mutation sites in `backend/app` (comparison, boolean and arithmetic operator swaps, negated conditions, changed constants, `return None`, call → `pass`) and runs a fixed-seed sample of 100. Odd-numbered mutants (in both the AST and Stryker tiers) are "visible": survivors may be shown to an agent improving the tests. Even-numbered ones are "held-out" and never shown, so their score measures general improvement rather than targeting.
 
 `python tools/collect_evidence.py <name>` runs everything (all suites, coverage, 3 shuffled-order reruns and all mutation tiers) and writes it to `docs/hw2/evidence/<name>/`.
 

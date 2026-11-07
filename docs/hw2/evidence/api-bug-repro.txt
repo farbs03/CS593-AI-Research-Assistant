@@ -1,0 +1,13 @@
+$ curl -F "file=@corrupt.pdf" $API/api/papers/upload        # BUG-1: corrupt PDF upload
+HTTP 500
+
+$ curl -X DELETE $API/api/papers/99999/chat                  # BUG: clear chat for a paper that does not exist
+HTTP 204
+$ curl $API/api/papers/99999/chat                            #   (GET on the same endpoint, for comparison)
+{"detail":"Paper not found"}   HTTP 404
+
+$ curl "$API/api/search?q=%20%20%20"                          # BUG: whitespace-only query accepted
+HTTP 200
+
+$ curl $API/api/papers/9223372036854775808                   # BUG: 64-bit overflowing id
+HTTP 500

@@ -100,8 +100,11 @@ async function app(page) {
   await page.screenshot({ path: o('search') }); console.log('  ', o('search'))
 
   // Save both results, then open the one with a PDF and exercise summary + chat.
-  for (const btn of await page.getByRole('button', { name: /save/i }).all()) await btn.click()
-  await page.waitForTimeout(800)
+  const save = page.getByRole('button', { name: /save to library/i })
+  while (await save.count()) {
+    await save.first().click() // the clicked button turns into "Saved", so re-query each time
+    await page.waitForTimeout(800)
+  }
   await page.goto(`${base}/library`)
   await page.waitForTimeout(800)
   await page.screenshot({ path: o('library') }); console.log('  ', o('library'))
@@ -120,7 +123,8 @@ async function app(page) {
   // UI-visible bug: a non-numeric paper id surfaces a raw 422 instead of "not found".
   await page.goto(`${base}/papers/abc`)
   await page.waitForTimeout(1200)
-  await page.screenshot({ path: o('bug-nan-id') }); console.log('  ', o('bug-nan-id'))
+  await page.screenshot({ path: o('bug-nan-id'), clip: { x: 0, y: 0, width: 1000, height: 240 } })
+  console.log('  ', o('bug-nan-id'))
 }
 
 ;(async () => {
@@ -131,7 +135,10 @@ async function app(page) {
   try {
     if (mode === 'reports') for (const r of rounds) await reports(page, r)
     else if (mode === 'app') await app(page)
-    else throw new Error('usage: screenshots.cjs reports <round...> | app')
+    else if (mode === 'term') {
+      const [title, file, name] = rounds // render any text file as a terminal-style image
+      await terminal(page, title, fs.readFileSync(file, 'utf8').trim(), path.join(SHOTS, `${name}.png`))
+    } else throw new Error('usage: screenshots.cjs reports <round...> | app | term <title> <file> <name>')
   } finally {
     await browser.close()
   }
