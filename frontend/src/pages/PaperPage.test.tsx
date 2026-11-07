@@ -1,11 +1,13 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { Link } from 'react-router-dom'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   calls,
   deferred,
   errorResponse,
   jsonResponse,
+  lateJsonResponse,
   makeMessage,
   makePaper,
   mockFetch,
@@ -48,6 +50,18 @@ function setup({ paper = PAPER, chat = [], extra }: Opts = {}) {
 
 const renderPaper = (id: number | string = 7) =>
   renderPage(<PaperPage />, { route: `/papers/${id}`, path: '/papers/:id' })
+
+/** Paper 7's page plus an in-app link to paper 8, to test moving from one paper to another. */
+const renderWithNextLink = () =>
+  renderPage(
+    <>
+      <PaperPage />
+      <Link to="/papers/8">Next paper</Link>
+    </>,
+    { route: '/papers/7', path: '/papers/:id' },
+  )
+
+const PAPER_8 = makePaper({ id: 8, title: 'BERT', abstract: 'Bidirectional encoders.' })
 
 const chatPanel = () => screen.getByRole('complementary', { name: 'Questions about this paper' })
 
@@ -132,6 +146,84 @@ describe('PaperPage details', () => {
   })
 })
 
+describe('PaperPage navigation between papers', () => {
+  it('shows only the new paper (and its chat) after navigating from another paper', async () => {
+    const user = userEvent.setup()
+    const next = deferred<Response>()
+    setup({
+      chat: [makeMessage({ id: 1, paper_id: 7, role: 'user', content: 'Question about paper 7' })],
+      extra: (req) => {
+        if (req.path === '/api/papers/8') return next.promise
+        if (req.path === '/api/papers/8/chat')
+          return jsonResponse([makeMessage({ id: 2, paper_id: 8, role: 'user', content: 'Question about BERT' })])
+      },
+    })
+    renderWithNextLink()
+    expect(await screen.findByText('Question about paper 7')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('link', { name: 'Next paper' }))
+    // While paper 8 loads, nothing of paper 7 is left on screen.
+    expect(await screen.findByText('Loading paper…')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { level: 1 })).not.toBeInTheDocument()
+    expect(screen.queryByText('Question about paper 7')).not.toBeInTheDocument()
+
+    next.resolve(jsonResponse(PAPER_8))
+    expect(await screen.findByRole('heading', { level: 1, name: 'BERT' })).toBeInTheDocument()
+    expect(await screen.findByText('Question about BERT')).toBeInTheDocument()
+    expect(screen.queryByText('Question about paper 7')).not.toBeInTheDocument()
+  })
+
+  // APP BUG: the load effect (src/pages/PaperPage.tsx:23-27) never ignores the response for an id
+  // the user has already navigated away from, so a slow response for the previous paper replaces
+  // the paper that is now in the URL.
+  it.fails('a slow response for the previous paper never replaces the current one', async () => {
+    const user = userEvent.setup()
+    const slow7 = deferred<Response>()
+    setup({
+      paper: () => slow7.promise as unknown as Response,
+      extra: (req) => {
+        if (req.path === '/api/papers/8') return jsonResponse(PAPER_8)
+        if (req.path === '/api/papers/8/chat') return jsonResponse([])
+      },
+    })
+    renderWithNextLink()
+    expect(screen.getByText('Loading paper…')).toBeInTheDocument()
+    await user.click(screen.getByRole('link', { name: 'Next paper' }))
+    expect(await screen.findByRole('heading', { level: 1, name: 'BERT' })).toBeInTheDocument()
+
+    const late = lateJsonResponse(PAPER)
+    slow7.resolve(late.response)
+    await act(() => late.read)
+    expect(screen.getByTestId('location')).toHaveTextContent('/papers/8')
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('BERT')
+  })
+
+  // APP BUG: SummaryPanel's onSummary callback (src/pages/PaperPage.tsx:79-82) closes over the
+  // paper it was rendered for and calls setPaper({ ...paper, summary }). If the summary arrives
+  // after the user moved on to another paper, the old paper (with its summary) replaces the new one.
+  it.fails('a summary that finishes after leaving the paper does not bring that paper back', async () => {
+    const user = userEvent.setup()
+    const summary = deferred<Response>()
+    setup({
+      extra: (req) => {
+        if (req.path === '/api/papers/7/summary') return summary.promise
+        if (req.path === '/api/papers/8') return jsonResponse(PAPER_8)
+        if (req.path === '/api/papers/8/chat') return jsonResponse([])
+      },
+    })
+    renderWithNextLink()
+    await user.click(await screen.findByRole('button', { name: 'Summarize paper' }))
+    await user.click(screen.getByRole('link', { name: 'Next paper' }))
+    expect(await screen.findByRole('heading', { level: 1, name: 'BERT' })).toBeInTheDocument()
+
+    const late = lateJsonResponse({ summary: 'Summary of paper 7' })
+    summary.resolve(late.response)
+    await act(() => late.read)
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('BERT')
+    expect(screen.queryByText('Summary of paper 7')).not.toBeInTheDocument()
+  })
+})
+
 describe('PaperPage summary', () => {
   it('summarizes on request, renders markdown and refreshes the library', async () => {
     const user = userEvent.setup()
@@ -212,15 +304,28 @@ describe('PaperPage chat', () => {
   it('loads and renders existing chat history', async () => {
     setup({
       chat: [
-        makeMessage({ id: 1, paper_id: 7, role: 'user', content: 'What is it?' }),
+        makeMessage({ id: 1, paper_id: 7, role: 'user', content: 'What is **self-attention**?' }),
         makeMessage({ id: 2, paper_id: 7, role: 'assistant', content: 'A **transformer**.' }),
       ],
     })
     renderPaper()
-    expect(await screen.findByText('What is it?')).toBeInTheDocument()
+    // The user's own words are shown exactly as typed; only answers are rendered as Markdown.
+    expect((await screen.findByText('What is **self-attention**?')).tagName).toBe('P')
     expect(screen.getByText('transformer').tagName).toBe('STRONG')
     expect(screen.queryByText('Ask anything, or start with one of these:')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Clear' })).toBeInTheDocument()
+  })
+
+  it('shows no messages and no Clear button while the history is still loading', async () => {
+    const history = deferred<Response>()
+    setup({ chat: () => history.promise as unknown as Response })
+    renderPaper()
+    const panel = await waitFor(() => chatPanel())
+    expect(panel.querySelectorAll('.msg')).toHaveLength(0)
+    expect(within(panel).queryByRole('button', { name: 'Clear' })).not.toBeInTheDocument()
+    history.resolve(jsonResponse([makeMessage({ id: 1, paper_id: 7, role: 'user', content: 'Earlier question' })]))
+    expect(await within(panel).findByText('Earlier question')).toBeInTheDocument()
+    expect(panel.querySelectorAll('.msg')).toHaveLength(1)
   })
 
   // APP BUG: ChatPanel stores history-load failures (src/pages/PaperPage.tsx:145) in the same
@@ -252,7 +357,16 @@ describe('PaperPage chat', () => {
     const box = await screen.findByRole('textbox', { name: 'Your question' })
     const scrollIntoView = vi.mocked(Element.prototype.scrollIntoView)
     await user.type(box, '  What datasets are used?  ')
-    await user.click(screen.getByRole('button', { name: 'Ask' }))
+    // The page handles the submission itself: the browser must not also submit the form (reload).
+    const submits: boolean[] = []
+    const onSubmit = (e: Event) => submits.push(e.defaultPrevented)
+    document.addEventListener('submit', onSubmit)
+    try {
+      await user.click(screen.getByRole('button', { name: 'Ask' }))
+    } finally {
+      document.removeEventListener('submit', onSubmit)
+    }
+    expect(submits).toEqual([true])
 
     expect(body).toEqual({ question: 'What datasets are used?' })
     expect(box).toHaveValue('')
@@ -320,6 +434,8 @@ describe('PaperPage chat', () => {
     expect(asked).toEqual([])
     await user.type(box, '{Enter}')
     await waitFor(() => expect(asked).toEqual([{ question: 'line one\nline two' }]))
+    expect(await screen.findByText('ok')).toBeInTheDocument()
+    expect(box).toHaveValue('') // the Enter that sent the question did not also type a newline
   })
 
   it('does not send blank questions', async () => {

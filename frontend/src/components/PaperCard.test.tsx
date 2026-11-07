@@ -75,8 +75,8 @@ describe('PaperCard', () => {
     const abstract = 'a'.repeat(400) + ' ' + 'b'.repeat(19) + 'END-OF-ABSTRACT'
     renderCard(makeResult({ abstract }))
     const para = screen.getByText(/^a+/)
-    expect(para.textContent).toContain('a'.repeat(400) + ' ' + 'b'.repeat(19) + '…')
-    expect(para.textContent).not.toContain('END-OF-ABSTRACT')
+    // Exactly 420 characters, an ellipsis, then (after a space) the toggle.
+    expect(para.textContent).toBe('a'.repeat(400) + ' ' + 'b'.repeat(19) + '… Show full abstract')
 
     await user.click(screen.getByRole('button', { name: 'Show full abstract' }))
     expect(screen.getByText(/END-OF-ABSTRACT/)).toBeInTheDocument()

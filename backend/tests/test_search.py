@@ -187,12 +187,22 @@ def test_parse_arxiv_empty_feed():
     assert search._parse_arxiv(atom_feed()) == []
 
 
+def test_parse_arxiv_odd_entry_does_not_discard_the_others():
+    bare = "<entry><id>http://arxiv.org/abs/2101.00001v2</id></entry>"  # no title/date/authors/summary
+    odd, good = search._parse_arxiv(atom_feed(bare, atom_entry()))
+    assert (odd.external_id, odd.title, odd.authors, odd.year, odd.abstract) == ("arxiv:2101.00001", "", [], None, "")
+    assert good.external_id == "arxiv:1706.03762"
+    assert good.title == "Attention Is All You Need"
+    assert good.authors == ["Ashish Vaswani", "Noam Shazeer"]
+
+
 @pytest.mark.parametrize(
     ("query", "conj", "expected"),
     [
         ("graph neural networks", "AND", "all:graph AND all:neural AND all:networks"),
         ("the attention of a transformer", "AND", "all:attention AND all:transformer"),
         ("diffusion models for video", "OR", "all:diffusion OR all:models OR all:video"),
+        ("models that are small or fast", "AND", "all:models AND all:that AND all:small AND all:fast"),
         ("self-supervised learning", "AND", "all:self-supervised AND all:learning"),
         ("The Of And", "AND", "all:The AND all:Of AND all:And"),  # only stopwords: keep them all
         ("???", "AND", "all:???"),
@@ -275,12 +285,28 @@ async def test_search_papers_falls_back_to_arxiv_on_s2_failure(no_sleep):
     assert results[0].source == "arxiv"
 
 
-async def test_search_papers_falls_back_on_s2_timeout():
+@pytest.mark.parametrize(
+    "outage",
+    [httpx.ReadTimeout("slow"), httpx.ConnectError("connection refused"), httpx.Response(503)],
+    ids=["timeout", "network-error", "http-503"],
+)
+async def test_search_papers_falls_back_when_s2_is_down(outage):
     with respx.mock() as mock:
-        mock.get(search.S2_URL).mock(side_effect=httpx.ReadTimeout("slow"))
+        mock.get(search.S2_URL).mock(side_effect=[outage])
         mock.get(search.ARXIV_URL).respond(200, text=atom_feed(atom_entry()))
-        _, provider = await search.search_papers("q", 3)
+        results, provider = await search.search_papers("q", 3)
     assert provider == "arxiv"
+    assert [r.external_id for r in results] == ["arxiv:1706.03762"]
+
+
+async def test_search_papers_does_not_fall_back_when_s2_finds_nothing():
+    # An empty answer is a valid answer: arXiv is only for when Semantic Scholar is unavailable.
+    with respx.mock(assert_all_called=False) as mock:
+        mock.get(search.S2_URL).respond(200, json={"data": []})
+        arxiv = mock.get(search.ARXIV_URL).respond(200, text=atom_feed(atom_entry()))
+        results, provider = await search.search_papers("q", 3)
+    assert (results, provider) == ([], "semantic_scholar")
+    assert not arxiv.called
 
 
 async def test_search_papers_falls_back_when_s2_returns_non_json():
@@ -294,15 +320,19 @@ async def test_search_papers_falls_back_when_s2_returns_non_json():
 
 @pytest.mark.xfail(
     strict=True,
-    reason="APP BUG: search_semantic_scholar indexes item['paperId'] (app/search.py:57), so ONE "
-    "S2 item without a paperId raises KeyError and search_papers throws away every valid S2 "
-    "result, silently switching the whole search to arXiv.",
+    reason="APP BUG: search_semantic_scholar maps items without any guard (app/search.py:47-65): an "
+    "item without paperId (KeyError), a null item or a null author entry (AttributeError) aborts the "
+    "whole parse, and search_papers then throws away every valid S2 result and silently switches "
+    "the search to arXiv.",
 )
-async def test_one_malformed_s2_item_does_not_discard_the_other_results():
+@pytest.mark.parametrize(
+    "odd_item",
+    [{"title": "no paperId"}, None, s2_item(paperId="odd2", authors=[None, {"name": "Ada"}])],
+    ids=["missing-paperId", "null-item", "null-author"],
+)
+async def test_one_odd_s2_item_does_not_discard_the_other_results(odd_item):
     with respx.mock(assert_all_called=False) as mock:
-        mock.get(search.S2_URL).respond(
-            200, json={"data": [s2_item(paperId="good1", title="Good Paper"), {"title": "no paperId"}]}
-        )
+        mock.get(search.S2_URL).respond(200, json={"data": [s2_item(paperId="good1", title="Good Paper"), odd_item]})
         arxiv = mock.get(search.ARXIV_URL).respond(200, text=atom_feed(atom_entry()))
         results, provider = await search.search_papers("q", 3)
     assert provider == "semantic_scholar"

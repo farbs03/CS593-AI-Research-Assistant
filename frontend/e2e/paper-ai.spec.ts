@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type APIRequestContext, type Page } from '@playwright/test'
 import { answerNextDialog, resetLibrary } from './helpers'
 
 const SAVED_PAPER = {
@@ -113,6 +113,41 @@ test('ask questions, keep history across reloads, then clear it', async ({ page,
 
   await page.reload()
   await expect(chat.getByText('Ask anything, or start with one of these:')).toBeVisible()
+})
+
+/** Opens the paper with one Q&A pair, then clicks Clear while the server fails the DELETE. */
+async function clearChatWhileServerFails(page: Page, request: APIRequestContext) {
+  expect((await request.post(`/api/papers/${paperId}/chat`, { data: { question: 'Seeded question?' } })).status()).toBe(200)
+  await page.route(`**/api/papers/${paperId}/chat`, (route) =>
+    route.request().method() === 'DELETE'
+      ? route.fulfill({ status: 500, json: { detail: 'database is locked' } })
+      : route.fallback(),
+  )
+  await page.goto(`/papers/${paperId}`)
+  const chat = page.getByRole('complementary', { name: 'Questions about this paper' })
+  await expect(chat.locator('.msg')).toHaveCount(2)
+
+  const dialog = answerNextDialog(page, 'accept')
+  const failed = page.waitForResponse((r) => r.request().method() === 'DELETE' && r.url().endsWith(`/api/papers/${paperId}/chat`))
+  await chat.getByRole('button', { name: 'Clear' }).click()
+  expect((await failed).status()).toBe(500)
+  await expect.poll(() => dialog).toEqual(['Clear this Q&A history?'])
+  return chat
+}
+
+test('a failed clear keeps the Q&A history on screen and on the server', async ({ page, request }) => {
+  const chat = await clearChatWhileServerFails(page, request)
+  await expect(chat.locator('.msg')).toHaveCount(2)
+  await expect(chat.getByText('E2E fake answer to: Seeded question?')).toBeVisible()
+  expect(await (await request.get(`/api/papers/${paperId}/chat`)).json()).toHaveLength(2)
+})
+
+test('a failed clear tells the user it failed', async ({ page, request }) => {
+  // APP BUG: ChatPanel.clear (src/pages/PaperPage.tsx:174-178) awaits api.clearChat without a
+  // try/catch, so the error becomes an unhandled promise rejection and the user sees nothing.
+  test.fail()
+  await clearChatWhileServerFails(page, request)
+  await expect(page.getByText(/database is locked/)).toBeVisible({ timeout: 2_000 })
 })
 
 test('opening a paper that does not exist shows an error', async ({ page }) => {

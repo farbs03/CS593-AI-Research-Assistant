@@ -176,8 +176,8 @@ async def test_extract_metadata_truncates_input_to_12000_chars(fake_llm):
     text = "a" * 12000 + "OVERFLOW"
     await llm.extract_metadata(text)
     prompt = fake_llm.calls[0]["messages"][0]["content"]
-    assert "a" * 12000 in prompt
-    assert "OVERFLOW" not in prompt
+    # Exactly the first 12000 characters close the prompt: not one character more.
+    assert prompt.endswith("\n\n" + "a" * 12000)
 
 
 async def test_extract_metadata_propagates_llm_error(fake_llm):

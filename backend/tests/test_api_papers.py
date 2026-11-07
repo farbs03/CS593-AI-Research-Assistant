@@ -75,10 +75,50 @@ def test_get_paper_returns_read_model(client, add_paper):
     assert "full_text" not in body
 
 
-def test_get_missing_paper_404(client):
-    r = client.get("/api/papers/9999")
+@pytest.mark.parametrize(
+    ("method", "suffix", "body"),
+    [
+        ("GET", "", None),
+        ("DELETE", "", None),
+        ("GET", "/pdf", None),
+        ("POST", "/summary", None),
+        ("GET", "/chat", None),
+        ("POST", "/chat", {"question": "What is it about?"}),
+        pytest.param(
+            "DELETE", "/chat", None,
+            marks=pytest.mark.xfail(
+                strict=True,
+                reason="APP BUG: clear_chat (app/routes/ai.py:72-75) never looks the paper up, so "
+                "DELETE /api/papers/{unknown id}/chat answers 204 No Content instead of 404.",
+            ),
+        ),
+    ],
+    ids=["get", "delete", "get-pdf", "summary", "get-chat", "ask", "clear-chat"],
+)
+def test_every_paper_endpoint_404s_for_unknown_id(client, session, add_paper, fake_llm, method, suffix, body):
+    # R2: every /api/papers/{id}... endpoint, every method, answers the same 404 for a missing id.
+    keep = add_paper(title="Keep me", full_text="body")
+    session.add(ChatMessage(paper_id=keep.id, role="user", content="q"))
+    session.commit()
+
+    r = client.request(method, f"/api/papers/{keep.id + 1000}{suffix}", json=body)
     assert r.status_code == 404
-    assert r.json()["detail"] == "Paper not found"
+    assert r.json() == {"detail": "Paper not found"}
+    assert fake_llm.calls == []
+    session.expire_all()
+    assert [p.title for p in session.exec(select(Paper)).all()] == ["Keep me"]
+    assert len(session.exec(select(ChatMessage)).all()) == 1
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="APP BUG: paper_id is an unbounded int; an id beyond SQLite's 64-bit INTEGER range makes "
+    "session.get raise OverflowError (app/routes/papers.py:21) -> 500 instead of 404 'Paper not found'.",
+)
+def test_paper_id_beyond_64_bits_is_404(client):
+    r = client.get(f"/api/papers/{2**63}")
+    assert r.status_code == 404
+    assert r.json() == {"detail": "Paper not found"}
 
 
 def test_get_paper_non_integer_id_422(client):
@@ -165,6 +205,31 @@ def test_save_is_idempotent_by_external_id(client, session):
     assert second.json()["id"] == first["id"]
     assert second.json()["title"] == "Attention Is All You Need"
     assert len(session.exec(select(Paper)).all()) == 1
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="APP BUG: save_paper only dedupes truthy external ids (app/routes/papers.py:49), but the "
+    "unique index also covers ''; saving a second paper with external_id '' raises IntegrityError "
+    "at commit -> 500.",
+)
+def test_saving_empty_external_id_twice_is_not_a_server_error(client, session):
+    first = client.post("/api/papers", json=search_result(external_id=""))
+    assert first.status_code == 201
+    second = client.post("/api/papers", json=search_result(external_id=""))
+    assert second.status_code < 500
+    assert len(session.exec(select(Paper)).all()) == 1
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="APP BUG: PaperBase.year is an unbounded int (app/models.py:18); a year outside SQLite's "
+    "64-bit INTEGER range raises OverflowError at commit -> 500 instead of a 4xx validation error.",
+)
+def test_save_out_of_range_year_is_a_client_error(client, session):
+    r = client.post("/api/papers", json=search_result(year=10**20))
+    assert 400 <= r.status_code < 500
+    assert session.exec(select(Paper)).all() == []
 
 
 def test_save_without_external_id_never_dedupes(client, session):
@@ -268,6 +333,51 @@ def test_upload_falls_back_when_llm_returns_garbage(client, fake_llm, make_pdf):
     r = upload(client, make_pdf([[("Heuristic Title", 22)]]))
     assert r.status_code == 201
     assert r.json()["title"] == "Heuristic Title"
+
+
+_ODD_SHAPE_BUG = (
+    "APP BUG: extract_metadata (app/llm.py:62) does `str(a).strip() for a in data.get('authors')` "
+    "without checking the shape, so a string is split into single characters, null becomes the "
+    "author 'None' and an object becomes its Python repr."
+)
+
+
+@pytest.mark.parametrize(
+    "shape",
+    [
+        {"title": 42},
+        {"title": ["LLM", "Title"]},
+        {"abstract": ["one", "two"]},
+        {"year": 2019.0},
+        {"year": {"value": 2019}},
+        pytest.param({"authors": "Ada Lovelace"}, marks=pytest.mark.xfail(strict=True, reason=_ODD_SHAPE_BUG)),
+        pytest.param({"authors": [None, "Ada Lovelace"]}, marks=pytest.mark.xfail(strict=True, reason=_ODD_SHAPE_BUG)),
+        pytest.param({"authors": [{"name": "Ada Lovelace"}]}, marks=pytest.mark.xfail(strict=True, reason=_ODD_SHAPE_BUG)),
+        pytest.param(
+            {"year": "99999999999999999999"},
+            marks=pytest.mark.xfail(
+                strict=True,
+                reason="APP BUG: extract_metadata accepts any all-digit year (app/llm.py:63); one "
+                "beyond SQLite's INTEGER range makes the upload's commit raise OverflowError -> 500.",
+            ),
+        ),
+    ],
+    ids=["title-number", "title-list", "abstract-list", "year-float", "year-object",
+         "authors-string", "authors-null-entry", "authors-objects", "year-overflow"],
+)
+def test_odd_llm_metadata_shapes_never_corrupt_metadata(client, fake_llm, make_pdf, shape):
+    # R4: whatever JSON the LLM sends, the stored metadata keeps its types and holds whole names;
+    # anything unusable is filled in by the heuristics (title/author/year below).
+    data = make_pdf([[("Heuristic Title", 22), ("Published 2016", 11)]], metadata={"author": "Heuristic Author"})
+    fake_llm.replies = [json.dumps({"title": "LLM Title", "authors": ["Ada Lovelace"], "year": None,
+                                    "abstract": None} | shape)]
+    r = upload(client, data)
+    assert r.status_code == 201
+    body = r.json()
+    assert body["title"] in {"LLM Title", "Heuristic Title"}
+    assert body["authors"] and set(body["authors"]) <= {"Ada Lovelace", "Heuristic Author"}
+    assert body["year"] in {2016, 2019}
+    assert body["abstract"] is None or isinstance(body["abstract"], str)
 
 
 def test_upload_title_falls_back_to_filename(client, fake_llm, make_pdf):
@@ -386,11 +496,17 @@ def test_get_pdf_without_stored_pdf_404(client, add_paper):
     assert r.json()["detail"] == "No PDF stored for this paper"
 
 
-def test_get_pdf_unknown_paper_404(client):
-    r = client.get("/api/papers/424242/pdf")
+@pytest.mark.xfail(
+    strict=True,
+    reason="APP BUG: get_pdf (app/routes/papers.py:105) returns a FileResponse without checking that "
+    "the stored file exists; Starlette then raises RuntimeError -> 500 instead of 404.",
+)
+def test_get_pdf_whose_file_is_missing_404(client, add_paper, upload_dir):
+    p = add_paper(pdf_path="deleted-from-disk.pdf")
+    assert not (upload_dir / "deleted-from-disk.pdf").exists()
+    r = client.get(f"/api/papers/{p.id}/pdf")
     assert r.status_code == 404
-    # The paper itself is missing, which is a different error from "paper has no PDF".
-    assert r.json() == {"detail": "Paper not found"}
+    assert isinstance(r.json()["detail"], str) and r.json()["detail"]
 
 
 # ---------------------------------------------------------------- delete

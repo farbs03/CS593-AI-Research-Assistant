@@ -1,0 +1,321 @@
+$ node C:\Users\cgera\Coding\Classes\CS593-ASE\ai-research-assistant\frontend\node_modules\@stryker-mutator\core\bin\stryker.js run --reporters clear-text,html,json
+exit code: 0
+
+[32m17:22:06 (23592) INFO ProjectReader[39m Found 7 of 49 file(s) to be mutated.
+[32m17:22:07 (23592) INFO Instrumenter[39m Instrumented 7 source file(s) with 518 mutant(s)
+[32m17:22:07 (23592) INFO ConcurrencyTokenProvider[39m Creating 4 test runner process(es).
+[32m17:22:09 (23592) INFO DryRunExecutor[39m Starting initial test run (vitest test runner with "perTest" coverage analysis). This may take a while.
+[32m17:22:48 (23592) INFO DryRunExecutor[39m Initial test run succeeded. Ran 112 tests in 39 seconds (net 9506.866599999998 ms, overhead 29601.133400000002 ms).
+
+All tests
+  api/client.test.ts
+    ✓ request error handling > returns parsed JSON on success [line 6] (killed 2)
+    ~ request error handling > returns undefined for 204 No Content [line 12] (covered 8)
+    ✓ request error handling > uses the FastAPI "detail" string as the error message [line 17] (killed 1)
+    ~ request error handling > shows the messages from a FastAPI validation error (detail list) [line 25] (covered 15)
+    ✓ request error handling > falls back to status and status text when a JSON error body has no detail [line 40] (killed 2)
+    ~ request error handling > falls back to status and status text for non-JSON error bodies [line 46] (covered 10)
+    ✓ request error handling > reports an unreachable server with a helpful message [line 51] (killed 2)
+    ~ endpoints > search encodes the query and default limit [line 62] (covered 7)
+    ~ endpoints > search passes a custom limit [line 71] (covered 7)
+    ✓ endpoints > listPapers and getPaper use GET [line 77] (killed 1)
+    ✓ endpoints > savePaper POSTs the paper as JSON [line 85] (killed 3)
+    ✓ endpoints > deletePaper sends DELETE [line 96] (killed 3)
+    ✓ endpoints > uploadPaper sends the file as multipart form data under "file" [line 102] (killed 5)
+    ✓ endpoints > pdfUrl builds the stored-PDF URL without fetching [line 115] (killed 1)
+    ✓ endpoints > summarize POSTs with regenerate=false by default and true on request [line 121] (killed 4)
+    ✓ endpoints > getChat, ask and clearChat hit the chat endpoint [line 129] (killed 6)
+    ~ mock sanity > unmocked requests surface as errors [line 143] (covered 14)
+  components/PaperCard.test.tsx
+    ✓ PaperCard > shows title, authors, year and source [line 17] (killed 7)
+    ~ PaperCard > labels source arxiv as "arXiv" [line 29] (covered 29)
+    ~ PaperCard > labels source upload as "Uploaded PDF" [line 29] (covered 29)
+    ~ PaperCard > labels source semantic_scholar as "Semantic Scholar" [line 29] (covered 29)
+    ~ PaperCard > title is plain text without titleHref and a link with it [line 34] (covered 29)
+    ✓ PaperCard > shows at most six authors and counts the rest [line 42] (killed 5)
+    ✓ PaperCard > shows exactly six authors without "more" [line 49] (killed 1)
+    ✓ PaperCard > handles missing authors, year and abstract [line 54] (killed 4)
+    ~ PaperCard > treats an empty abstract as missing [line 61] (covered 22)
+    ✓ PaperCard > shows a short abstract in full with no toggle [line 66] (killed 6)
+    ✓ PaperCard > truncates long abstracts at 420 chars and toggles the full text [line 73] (killed 13)
+    ✓ PaperCard > trims trailing whitespace before the ellipsis [line 89] (killed 1)
+    ✓ PaperCard > links to the paper page and PDF in a new tab [line 95] (killed 6)
+    ~ PaperCard > omits links that are not available [line 107] (covered 29)
+    ~ PaperCard > renders custom actions and badges [line 113] (covered 29)
+  pages
+    LibraryPage.test.tsx
+      ✓ LibraryPage > shows an empty-library message with a link to search [line 45] (killed 13)
+      ✓ LibraryPage > shows a load error instead of the empty message [line 53] (killed 8)
+      ✓ LibraryPage > lists saved papers with links and abstract-only badges [line 60] (killed 13)
+      ✓ LibraryPage > does not claim the library is empty while it is still loading [line 74] (killed 2)
+      ✓ LibraryPage > filters by title [line 89] (killed 9)
+      ~ LibraryPage > filters by author (case-insensitive) [line 89] (covered 105)
+      ~ LibraryPage > filters by abstract [line 89] (covered 105)
+      ✓ LibraryPage > filters by surrounding whitespace [line 89] (killed 1)
+      ~ LibraryPage > filter with no matches shows 0 of N [line 99] (covered 105)
+      ✓ LibraryPage > uploads a chosen PDF and opens the new paper [line 108] (killed 8)
+      ✓ LibraryPage > an upload that finishes after the user left the page still lands in the library [line 133] (killed 3)
+      ✓ LibraryPage > the Upload PDF button opens the file picker [line 167] (killed 1)
+      ✓ LibraryPage > accepts Scan.PDF (type "") as a PDF [line 180] (killed 4)
+      ~ LibraryPage > accepts paper.Pdf (type "application/octet-stream") as a PDF [line 180] (covered 131)
+      ✓ LibraryPage > accepts download (type "application/pdf") as a PDF [line 180] (killed 3)
+      ✓ LibraryPage > rejects notes.txt (type "text/plain") without uploading [line 195] (killed 7)
+      ~ LibraryPage > rejects paper.pdf.txt (type "text/plain") without uploading [line 195] (covered 75)
+      ~ LibraryPage > rejects pdf (type "") without uploading [line 195] (covered 75)
+      ✓ LibraryPage > shows the server error when an upload fails and stays on the page [line 204] (killed 6)
+      ~ LibraryPage > clears a previous upload error on the next attempt [line 215] (covered 133)
+      ✓ LibraryPage > uploads a PDF dropped on the drop zone [line 225] (killed 12)
+      ~ LibraryPage > ignores a drop without files [line 242] (covered 65)
+      ✓ LibraryPage > removes a paper after confirmation [line 252] (killed 12)
+      ~ LibraryPage > keeps the paper when removal is cancelled [line 265] (covered 101)
+      ✓ LibraryPage > alerts when removal fails and keeps the paper [line 276] (killed 2)
+    PaperPage.test.tsx
+      ✓ PaperPage details > shows a loading message, then the paper [line 74] (killed 10)
+      ✓ PaperPage details > renders metadata, abstract and links [line 84] (killed 18)
+      ✓ PaperPage details > handles a paper with minimal metadata [line 98] (killed 2)
+      ✓ PaperPage details > warns when only the abstract is available [line 111] (killed 7)
+      ✓ PaperPage details > shows an error for a missing paper [line 119] (killed 2)
+      ~ PaperPage details > rejects a non-numeric paper id without requesting /api/papers/NaN [line 129] (covered 47)
+      ✓ PaperPage navigation between papers > shows only the new paper (and its chat) after navigating from another paper [line 150] (killed 7)
+      ~ PaperPage navigation between papers > a slow response for the previous paper never replaces the current one [line 179] (covered 119)
+      ✓ PaperPage navigation between papers > a summary that finishes after leaving the paper does not bring that paper back [line 204] (killed 1)
+      ✓ PaperPage summary > summarizes on request, renders markdown and refreshes the library [line 228] (killed 20)
+      ✓ PaperPage summary > shows a cached summary and regenerates it [line 253] (killed 3)
+      ✓ PaperPage summary > shows summary errors and allows retry [line 270] (killed 6)
+      ✓ PaperPage chat > shows suggested questions when there is no history [line 294] (killed 20)
+      ✓ PaperPage chat > loads and renders existing chat history [line 304] (killed 9)
+      ✓ PaperPage chat > shows no messages and no Clear button while the history is still loading [line 319] (killed 3)
+      ~ PaperPage chat > says the Q&A history could not be loaded when loading it fails [line 335] (covered 127)
+      ✓ PaperPage chat > asks a typed question, shows pending state, then the answer [line 344] (killed 29)
+      ✓ PaperPage chat > clicking a suggested question asks it [line 395] (killed 1)
+      ✓ PaperPage chat > Enter submits but Shift+Enter inserts a newline [line 416] (killed 6)
+      ✓ PaperPage chat > does not send blank questions [line 441] (killed 3)
+      ✓ PaperPage chat > restores the question and shows the error when asking fails [line 451] (killed 6)
+      ~ PaperPage chat > appends follow-up answers after earlier messages [line 469] (covered 156)
+      ✓ PaperPage chat > clears the history after confirmation [line 497] (killed 7)
+      ~ PaperPage chat > keeps the history when clearing is cancelled [line 513] (covered 129)
+    SearchPage.test.tsx
+      ✓ SearchPage > shows example searches before any query [line 42] (killed 35)
+      ✓ SearchPage > searches on submit, puts the query in the URL and lists results [line 60] (killed 39)
+      ~ SearchPage > runs the query from the URL on load [line 77] (covered 130)
+      ✓ SearchPage > clicking an example runs that search [line 85] (killed 3)
+      ✓ SearchPage > does not search for a whitespace-only query [line 95] (killed 2)
+      ✓ SearchPage > labels arXiv results and shows an empty-result hint [line 109] (killed 7)
+      ✓ SearchPage > shows a loading state while searching [line 116] (killed 8)
+      ✓ SearchPage > shows the server error when search fails [line 127] (killed 14)
+      ✓ SearchPage > recovers from an error on the next search [line 134] (killed 1)
+      ✓ SearchPage > never lets an older query replace the results of a newer one [line 148] (killed 2)
+      ✓ SearchPage > each result keeps its own state when a new search returns different results [line 175] (killed 11)
+      ✓ SearchPage > saves a result to the library and then links to it [line 199] (killed 12)
+      ✓ SearchPage > shows a save error inline, lets the user retry, and drops the error once saving works [line 226] (killed 3)
+      ~ SearchPage > marks results the server reports as already saved [line 249] (covered 131)
+      ~ SearchPage > lists and saves results that have no external id [line 268] (covered 146)
+      ~ SearchPage > marks a result without an external id as saved after saving it [line 295] (covered 146)
+      ✓ SearchPage > marks results that are in the local library even if the server did not [line 310] (killed 1)
+  App.test.tsx
+    ✓ App > starts on the search page with navigation and a library count [line 25] (killed 7)
+    ✓ App > navigates between pages and scrolls to the top on each navigation [line 35] (killed 4)
+    ~ App > saving a search result updates the library count in the nav [line 58] (covered 179)
+  library.test.tsx
+    ~ LibraryProvider > loads the library on mount [line 22] (covered 25)
+    ~ LibraryProvider > exposes load errors and stops loading [line 33] (covered 34)
+    ✓ LibraryProvider > refresh reloads papers and clears a previous error [line 41] (killed 1)
+    ✓ LibraryProvider > save adds the new paper to the front of the list [line 53] (killed 5)
+    ✓ LibraryProvider > saving a paper that is already listed does not duplicate it [line 71] (killed 2)
+    ~ LibraryProvider > save failure propagates and leaves the list unchanged [line 84] (covered 39)
+    ✓ LibraryProvider > upload adds the uploaded paper [line 93] (killed 1)
+    ✓ LibraryProvider > remove deletes the paper and drops it from the list [line 106] (killed 3)
+    ~ LibraryProvider > remove failure keeps the paper [line 117] (covered 37)
+    ~ LibraryProvider > savedIdFor maps external ids to saved paper ids [line 126] (covered 30)
+    ✓ useLibrary > throws outside of a LibraryProvider [line 137] (killed 2)
+
+[Survived] CallExpression
+src/pages/LibraryPage.tsx:22:5
+-       setUploadError(null)
++       ;
+Tests ran:
+    LibraryPage > uploads a chosen PDF and opens the new paper
+    LibraryPage > an upload that finishes after the user left the page still lands in the library
+    LibraryPage > accepts Scan.PDF (type "") as a PDF
+  and 5 more tests!
+
+
+[Survived] StringLiteral
+src/pages/LibraryPage.tsx:54:34
+-           [p.title, p.authors.join(' '), p.abstract ?? ''].some((s) => s.toLowerCase().includes(needle)),
++           [p.title, p.authors.join(""), p.abstract ?? ''].some((s) => s.toLowerCase().includes(needle)),
+Tests ran:
+    LibraryPage > filters by title
+    LibraryPage > filters by author (case-insensitive)
+    LibraryPage > filters by abstract
+  and 2 more tests!
+
+
+[Survived] StringLiteral
+src/pages/LibraryPage.tsx:54:54
+-           [p.title, p.authors.join(' '), p.abstract ?? ''].some((s) => s.toLowerCase().includes(needle)),
++           [p.title, p.authors.join(' '), p.abstract ?? "Stryker was here!"].some((s) => s.toLowerCase().includes(needle)),
+Tests ran:
+    LibraryPage > filters by title
+    LibraryPage > filters by author (case-insensitive)
+    LibraryPage > filters by abstract
+  and 2 more tests!
+
+
+[Survived] OptionalChaining
+src/pages/LibraryPage.tsx:82:63
+-               <button className="button primary" onClick={() => inputRef.current?.click()}>
++               <button className="button primary" onClick={() => inputRef.current.click()}>
+Tests ran:
+    LibraryPage > the Upload PDF button opens the file picker
+
+
+[Survived] OptionalChaining
+src/pages/LibraryPage.tsx:92:44
+-             onChange={(e) => void handleFile(e.target.files?.[0])}
++             onChange={(e) => void handleFile(e.target.files[0])}
+Tests ran:
+    LibraryPage > uploads a chosen PDF and opens the new paper
+    LibraryPage > an upload that finishes after the user left the page still lands in the library
+    LibraryPage > accepts Scan.PDF (type "") as a PDF
+  and 7 more tests!
+
+
+[Survived] CallExpression
+src/pages/PaperPage.tsx:25:5
+-       setError(null)
++       ;
+Tests ran:
+    PaperPage details > shows a loading message, then the paper
+    PaperPage details > renders metadata, abstract and links
+    PaperPage details > handles a paper with minimal metadata
+  and 22 more tests!
+
+
+[Survived] StringLiteral
+src/pages/PaperPage.tsx:65:69
+-               abstract only. For better results, download the PDF and{' '}
++               abstract only. For better results, download the PDF and{""}
+Tests ran:
+    PaperPage details > warns when only the abstract is available
+
+
+[Survived] ArrowFunction
+src/pages/PaperPage.tsx:145:44
+-       api.getChat(paperId).then(setMessages, (e: Error) => setError(e.message))
++       api.getChat(paperId).then(setMessages, () => undefined)
+Tests ran:
+    PaperPage details > shows a loading message, then the paper
+    PaperPage details > renders metadata, abstract and links
+    PaperPage details > handles a paper with minimal metadata
+  and 20 more tests!
+
+
+[Survived] ArrayDeclaration
+src/pages/PaperPage.tsx:146:6
+-     }, [paperId])
++     }, [])
+Tests ran:
+    PaperPage details > shows a loading message, then the paper
+    PaperPage details > renders metadata, abstract and links
+    PaperPage details > handles a paper with minimal metadata
+  and 20 more tests!
+
+
+[Survived] OptionalChaining
+src/pages/PaperPage.tsx:149:5
+-       endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
++       endRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+Tests ran:
+    PaperPage details > shows a loading message, then the paper
+    PaperPage details > renders metadata, abstract and links
+    PaperPage details > handles a paper with minimal metadata
+  and 20 more tests!
+
+
+[Survived] CallExpression
+src/pages/PaperPage.tsx:157:5
+-       setError(null)
++       ;
+Tests ran:
+    PaperPage chat > asks a typed question, shows pending state, then the answer
+    PaperPage chat > clicking a suggested question asks it
+    PaperPage chat > Enter submits but Shift+Enter inserts a newline
+  and 2 more tests!
+
+
+[Survived] CallExpression
+src/pages/SearchPage.tsx:36:5
+-       e.preventDefault()
++       ;
+Tests ran:
+    SearchPage > searches on submit, puts the query in the URL and lists results
+    SearchPage > does not search for a whitespace-only query
+    SearchPage > recovers from an error on the next search
+  and 3 more tests!
+
+
+[Survived] ConditionalExpression
+src/pages/SearchPage.tsx:96:12
+-             {data.results.length === 0 && (
++             {true && (
+Tests ran:
+    SearchPage > searches on submit, puts the query in the URL and lists results
+    SearchPage > runs the query from the URL on load
+    SearchPage > clicking an example runs that search
+  and 12 more tests!
+
+
+[Survived] LogicalOperator
+src/pages/SearchPage.tsx:145:12
+-             {error && <span className="error inline">{error}</span>}
++             {error || <span className="error inline">{error}</span>}
+Tests ran:
+    SearchPage > searches on submit, puts the query in the URL and lists results
+    SearchPage > runs the query from the URL on load
+    SearchPage > clicking an example runs that search
+  and 11 more tests!
+
+
+[Survived] ArrayDeclaration
+src/library.tsx:34:6
+-     }, [])
++     }, ["Stryker was here"])
+Tests ran:
+    SearchPage > shows example searches before any query
+    SearchPage > searches on submit, puts the query in the URL and lists results
+    SearchPage > runs the query from the URL on load
+  and 76 more tests!
+
+
+[Survived] ArrayDeclaration
+src/library.tsx:38:6
+-     }, [refresh])
++     }, [])
+Tests ran:
+    SearchPage > shows example searches before any query
+    SearchPage > searches on submit, puts the query in the URL and lists results
+    SearchPage > runs the query from the URL on load
+  and 76 more tests!
+
+
+Ran 5.29 tests per mutant on average.
+------------------|------------------|----------|-----------|------------|----------|----------|
+                  | % Mutation score |          |           |            |          |          |
+File              |  total | covered | # killed | # timeout | # survived | # no cov | # errors |
+------------------|--------|---------|----------|-----------|------------|----------|----------|
+All files         |  96.90 |   96.90 |      500 |         0 |         16 |        0 |        2 |
+ api              | 100.00 |  100.00 |       55 |         0 |          0 |        0 |        0 |
+  client.ts       | 100.00 |  100.00 |       55 |         0 |          0 |        0 |        0 |
+ components       | 100.00 |  100.00 |       44 |         0 |          0 |        0 |        0 |
+  PaperCard.tsx   | 100.00 |  100.00 |       44 |         0 |          0 |        0 |        0 |
+ pages            |  96.16 |   96.16 |      351 |         0 |         14 |        0 |        2 |
+  LibraryPage.tsx |  94.68 |   94.68 |       89 |         0 |          5 |        0 |        2 |
+  PaperPage.tsx   |  96.25 |   96.25 |      154 |         0 |          6 |        0 |        0 |
+  SearchPage.tsx  |  97.30 |   97.30 |      108 |         0 |          3 |        0 |        0 |
+ App.tsx          | 100.00 |  100.00 |        7 |         0 |          0 |        0 |        0 |
+ library.tsx      |  95.56 |   95.56 |       43 |         0 |          2 |        0 |        0 |
+------------------|--------|---------|----------|-----------|------------|----------|----------|
+[32m17:38:28 (23592) INFO JsonReporter[39m Your report can be found at: file:///C:/Users/cgera/Coding/Classes/CS593-ASE/ai-research-assistant/docs/hw2/evidence/round2/stryker.json
+[32m17:38:28 (23592) INFO HtmlReporter[39m Your report can be found at: file:///C:/Users/cgera/Coding/Classes/CS593-ASE/ai-research-assistant/docs/hw2/evidence/round2/stryker.html
+[32m17:38:28 (23592) INFO MutationTestExecutor[39m Done in 16 minutes and 23 seconds.

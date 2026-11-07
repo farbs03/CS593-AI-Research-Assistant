@@ -68,6 +68,17 @@ describe('LibraryPage', () => {
     expect(within(items[0]).queryByText('Abstract only')).not.toBeInTheDocument()
     expect(within(items[1]).getByText('Abstract only')).toBeInTheDocument()
     expect(screen.getAllByText('Abstract only')).toHaveLength(1)
+    expect(screen.queryByText(/Your library is empty/)).not.toBeInTheDocument()
+  })
+
+  it('does not claim the library is empty while it is still loading', async () => {
+    const list = deferred<Response>()
+    setup(() => list.promise as unknown as Response)
+    renderPage(<LibraryPage />, { route: '/library', path: '/library' })
+    expect(screen.getByRole('button', { name: 'Upload PDF' })).toBeInTheDocument()
+    expect(screen.queryByText(/Your library is empty/)).not.toBeInTheDocument()
+    list.resolve(jsonResponse([]))
+    expect(await screen.findByText(/Your library is empty/)).toBeInTheDocument()
   })
 
   it.each([
@@ -162,23 +173,31 @@ describe('LibraryPage', () => {
     expect(click).toHaveBeenCalled()
   })
 
-  it('accepts a .pdf file even without a PDF mime type', async () => {
+  it.each([
+    ['Scan.PDF', ''],
+    ['paper.Pdf', 'application/octet-stream'],
+    ['download', 'application/pdf'],
+  ])('accepts %s (type "%s") as a PDF', async (name, type) => {
     const user = userEvent.setup({ applyAccept: false })
     const fetch = setup([], (req) =>
       req.path === '/api/papers/upload' ? jsonResponse(makePaper({ id: 9 }), 201) : undefined,
     )
     renderPage(<LibraryPage />, { route: '/library', path: '/library' })
-    await user.upload(fileInput(), pdfFile('Scan.PDF', ''))
+    await user.upload(fileInput(), pdfFile(name, type))
     await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/papers/9'))
-    expect(fetch.mock.calls.some(([u]) => u === '/api/papers/upload')).toBe(true)
+    expect(fetch.mock.calls.filter(([u]) => u === '/api/papers/upload')).toHaveLength(1)
   })
 
-  it('rejects non-PDF files without uploading', async () => {
+  it.each([
+    ['notes.txt', 'text/plain'],
+    ['paper.pdf.txt', 'text/plain'],
+    ['pdf', ''],
+  ])('rejects %s (type "%s") without uploading', async (name, type) => {
     const user = userEvent.setup({ applyAccept: false })
     const fetch = setup([])
     renderPage(<LibraryPage />, { route: '/library', path: '/library' })
-    await user.upload(fileInput(), new File(['hello'], 'notes.txt', { type: 'text/plain' }))
-    expect(await screen.findByText("Upload failed: notes.txt isn't a PDF. Choose a .pdf file.")).toBeInTheDocument()
+    await user.upload(fileInput(), new File(['hello'], name, { type }))
+    expect(await screen.findByText(`Upload failed: ${name} isn't a PDF. Choose a .pdf file.`)).toBeInTheDocument()
     expect(fetch.mock.calls.some(([u]) => u === '/api/papers/upload')).toBe(false)
   })
 
@@ -207,12 +226,15 @@ describe('LibraryPage', () => {
     setup([], (req) => (req.path === '/api/papers/upload' ? jsonResponse(makePaper({ id: 12 }), 201) : undefined))
     renderPage(<LibraryPage />, { route: '/library', path: '/library' })
     const zone = screen.getByText('Drop a paper PDF here, or').parentElement!
-    fireEvent.dragOver(zone)
-    expect(zone).toHaveClass('dragging')
+    expect(zone).toHaveClass('dropzone', { exact: true })
+    // fireEvent returns false when the page called preventDefault(). Browsers only allow a drop
+    // when dragover is cancelled, and open the dropped file themselves unless drop is cancelled.
+    expect(fireEvent.dragOver(zone)).toBe(false)
+    expect(zone).toHaveClass('dropzone dragging', { exact: true })
     fireEvent.dragLeave(zone)
-    expect(zone).not.toHaveClass('dragging')
+    expect(zone).toHaveClass('dropzone', { exact: true })
     fireEvent.dragOver(zone)
-    fireEvent.drop(zone, { dataTransfer: { files: [pdfFile('dropped.pdf')] } })
+    expect(fireEvent.drop(zone, { dataTransfer: { files: [pdfFile('dropped.pdf')] } })).toBe(false)
     expect(zone).not.toHaveClass('dragging')
     await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/papers/12'))
   })

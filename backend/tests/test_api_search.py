@@ -2,6 +2,7 @@
 
 import pytest
 
+import app.main
 import app.routes.search
 from app.models import SearchResult
 from app.search import SearchError
@@ -60,6 +61,18 @@ def test_search_validates_parameters(client, fake_search, params):
     assert fake_search["calls"] == []
 
 
+@pytest.mark.xfail(
+    strict=True,
+    reason="APP BUG: q is only checked with min_length=1 (app/routes/search.py:19), so a whitespace-only "
+    "query is accepted (200) and sent to the search providers instead of being rejected.",
+)
+@pytest.mark.parametrize("q", [" ", "\t\n  "], ids=["spaces", "tab-newline"])
+def test_search_rejects_whitespace_only_query(client, fake_search, q):
+    r = client.get("/api/search", params={"q": q})
+    assert 400 <= r.status_code < 500
+    assert fake_search["calls"] == []
+
+
 def test_search_all_providers_failing_is_502(client, fake_search):
     fake_search["error"] = SearchError("All search providers failed: 503")
     r = client.get("/api/search", params={"q": "x"})
@@ -72,10 +85,13 @@ def test_search_empty_results(client, fake_search):
     assert body == {"provider": "semantic_scholar", "results": []}
 
 
-def test_health(client):
+@pytest.mark.parametrize(("key", "configured"), [("sk-something", True), ("", False)])
+def test_health_reports_configured_model_and_whether_a_key_is_set(client, monkeypatch, key, configured):
+    monkeypatch.setattr(app.main, "LLM_MODEL", "configured-model-x")
+    monkeypatch.setattr(app.main, "LLM_API_KEY", key)
     r = client.get("/api/health")
     assert r.status_code == 200
-    assert r.json() == {"status": "ok", "llm_model": app.main.LLM_MODEL, "llm_configured": True}
+    assert r.json() == {"status": "ok", "llm_model": "configured-model-x", "llm_configured": configured}
 
 
 def test_cors_allows_vite_dev_origin(client):
@@ -90,5 +106,3 @@ def test_cors_rejects_other_origins(client):
     r = client.get("/api/health", headers={"Origin": "https://evil.example"})
     assert "access-control-allow-origin" not in r.headers
 
-
-import app.main  # noqa: E402  (used by test_health)

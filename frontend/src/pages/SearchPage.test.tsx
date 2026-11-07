@@ -1,10 +1,11 @@
-import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import {
   deferred,
   errorResponse,
   jsonResponse,
+  lateJsonResponse,
   makePaper,
   makeResult,
   mockFetch,
@@ -42,8 +43,15 @@ describe('SearchPage', () => {
     const fetch = setup()
     renderPage(<SearchPage />)
     expect(screen.getByRole('heading', { name: 'Find papers' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'retrieval-augmented generation' })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'LLM code repair' })).toBeInTheDocument()
+    expect(screen.getByText(/^Try/).textContent).toBe(
+      'Try retrieval-augmented generation, diffusion models for video, LLM code repair',
+    )
+    expect(screen.getAllByRole('button').map((b) => b.textContent)).toEqual([
+      'Search',
+      'retrieval-augmented generation',
+      'diffusion models for video',
+      'LLM code repair',
+    ])
     expect(screen.getByRole('button', { name: 'Search' })).toBeDisabled()
     await waitFor(() => expect(fetch).toHaveBeenCalled())
     expect(searchCalls(fetch)).toEqual([])
@@ -137,6 +145,57 @@ describe('SearchPage', () => {
     expect(screen.queryByText(/Search failed/)).not.toBeInTheDocument()
   })
 
+  it('never lets an older query replace the results of a newer one', async () => {
+    const user = userEvent.setup()
+    const slowFirst = deferred<Response>()
+    setup({
+      search: (req) =>
+        req.search.get('q') === 'first'
+          ? slowFirst.promise
+          : jsonResponse({ provider: 'semantic_scholar', results: [makeResult({ title: 'Answer to second' })] }),
+    })
+    renderPage(<SearchPage />, { route: '/?q=first' })
+    await screen.findByRole('button', { name: 'Searching…' })
+    const box = screen.getByRole('searchbox')
+    await user.clear(box)
+    await user.type(box, 'second')
+    fireEvent.submit(screen.getByRole('search')) // the button is disabled while "first" is loading
+    expect(await screen.findByText('1 results for “second” from Semantic Scholar')).toBeInTheDocument()
+
+    // The first query's response arrives late; wait until the page has fully read it.
+    const late = lateJsonResponse({ provider: 'arxiv', results: [makeResult({ title: 'Stale answer to first' })] })
+    slowFirst.resolve(late.response)
+    await act(() => late.read)
+    expect(screen.getByRole('button', { name: 'Search' })).toBeEnabled()
+    expect(screen.getByText('1 results for “second” from Semantic Scholar')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Answer to second')
+    expect(screen.queryByText('Stale answer to first')).not.toBeInTheDocument()
+  })
+
+  it('each result keeps its own state when a new search returns different results', async () => {
+    // Two different papers can share a title (e.g. a preprint and its journal version).
+    const user = userEvent.setup()
+    const preprint = makeResult({ external_id: 'arxiv:1', title: 'Same Title' })
+    const journal = makeResult({ external_id: 's2:2', title: 'Same Title', abstract: 'Journal version.' })
+    setup({
+      search: (req) =>
+        jsonResponse({ provider: 'semantic_scholar', results: req.search.get('q') === 'one' ? [preprint, journal] : [journal] }),
+      extra: (req) => (req.method === 'POST' ? errorResponse(500, 'disk full') : undefined),
+    })
+    renderPage(<SearchPage />, { route: '/?q=one' })
+    const [first] = await screen.findAllByRole('article')
+    await user.click(within(first).getByRole('button', { name: 'Save to library' }))
+    expect(await within(first).findByText('disk full')).toBeInTheDocument()
+
+    const box = screen.getByRole('searchbox')
+    await user.clear(box)
+    await user.type(box, 'two{Enter}')
+    expect(await screen.findByText('1 results for “two” from Semantic Scholar')).toBeInTheDocument()
+    // The journal version was never saved, so the preprint's save error must not appear on it.
+    expect(screen.getByRole('article')).toHaveTextContent('Journal version.')
+    expect(screen.queryByText('disk full')).not.toBeInTheDocument()
+  })
+
   it('saves a result to the library and then links to it', async () => {
     const user = userEvent.setup()
     const saveReq = deferred<Response>()
@@ -164,16 +223,27 @@ describe('SearchPage', () => {
     expect(screen.getAllByRole('button', { name: 'Save to library' })).toHaveLength(1)
   })
 
-  it('shows a save error inline and lets the user retry', async () => {
+  it('shows a save error inline, lets the user retry, and drops the error once saving works', async () => {
     const user = userEvent.setup()
+    let fail = true
     setup({
-      extra: (req) => (req.method === 'POST' ? errorResponse(500, 'disk full') : undefined),
+      extra: (req) =>
+        req.method === 'POST'
+          ? fail
+            ? errorResponse(500, 'disk full')
+            : jsonResponse(makePaper({ id: 42, external_id: 'arxiv:1706.03762' }), 201)
+          : undefined,
     })
     renderPage(<SearchPage />, { route: '/?q=attention' })
     const card = (await screen.findByRole('heading', { name: 'Attention Is All You Need' })).closest('article')!
     await user.click(within(card).getByRole('button', { name: 'Save to library' }))
     expect(await within(card).findByText('disk full')).toBeInTheDocument()
     expect(within(card).getByRole('button', { name: 'Save to library' })).toBeEnabled()
+
+    fail = false
+    await user.click(within(card).getByRole('button', { name: 'Save to library' }))
+    expect(await within(card).findByRole('link', { name: /Open in library/ })).toHaveAttribute('href', '/papers/42')
+    expect(within(card).queryByText('disk full')).not.toBeInTheDocument()
   })
 
   it('marks results the server reports as already saved', async () => {

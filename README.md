@@ -88,6 +88,62 @@ Open http://localhost:5173.
 2. **Library**: browse saved papers, or drop a PDF to upload it.
 3. **Paper page**: **Summarize paper**, then ask questions in the side panel. Try the suggested questions.
 
+## Testing
+
+The test suite was generated and then improved over three rounds by a coding agent, for CS593 HW2. The prompts, evaluation and results are in [`docs/hw2/`](docs/hw2/).
+
+No test calls a real LLM or paper-search API, and no test touches `backend/data/`.
+
+| Layer | Framework | Location |
+| --- | --- | --- |
+| Backend unit + API | pytest, pytest-cov, respx | `backend/tests/test_*.py` |
+| Frontend unit + component | Vitest, React Testing Library (jsdom) | `frontend/src/**/*.test.ts(x)` |
+| End-to-end | Playwright (Chromium) | `frontend/e2e/*.spec.ts` |
+
+Tests that expose a **known app bug** are kept and marked as expected failures, not deleted:
+- pytest: `xfail(strict=True)`
+- Vitest: `it.fails`
+- Playwright: `test.fail`
+
+Each one's reason starts with `APP BUG`. If a bug gets fixed, its test starts failing, which is the signal to remove the marker. Run `pytest --runxfail` to see the backend bug tests fail.
+
+### Install
+
+```bash
+cd backend && pip install -r requirements-dev.txt     # inside the backend venv
+cd frontend && npm install && npx playwright install chromium
+```
+
+### Run
+
+```bash
+# backend (from backend/)
+python -m pytest                                    # all tests
+python -m pytest --cov --cov-branch --cov-report=term-missing --cov-report=html   # + coverage (htmlcov/)
+
+# frontend (from frontend/)
+npm test                                            # Vitest
+npm run test:cov                                    # + v8 coverage (coverage/)
+npm run e2e                                         # Playwright E2E
+```
+
+The E2E tests start two servers themselves, so ports 8000 and 5173 must be free:
+- the real backend through `backend/tests/e2e_server.py`, with the LLM, search and PDF downloads stubbed, and a throwaway temp database;
+- the Vite dev server.
+
+### Fault detection (mutation testing)
+
+Three tiers of seeded faults, all applied to temporary copies, so the app itself is never modified:
+
+```bash
+# from the repo root, with the backend venv's python
+python tools/fault_injection.py --out <dir>   # 37 hand-written faults (tools/mutants.json)
+python tools/ast_mutation.py --out <dir>      # 100 tool-generated backend mutants (fixed seed)
+cd frontend && npm run mutation               # StrykerJS on the frontend (reports/mutation/)
+```
+
+`python tools/collect_evidence.py <name>` runs everything (all suites, coverage, 3 shuffled-order reruns and all mutation tiers) and writes it to `docs/hw2/evidence/<name>/`.
+
 ## Notes
 
 - `backend/.env` (secrets) and `backend/data/` (database and PDFs) are git-ignored. Never commit API keys.

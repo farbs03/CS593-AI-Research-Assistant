@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import { papers, resetLibrary } from './helpers'
 
 test.beforeEach(async ({ request }) => {
@@ -61,4 +61,35 @@ test('search query survives navigating to a paper and back', async ({ page }) =>
   await page.goBack()
   await expect(page.getByRole('searchbox')).toHaveValue('LLM code repair')
   await expect(page.getByText(/2 results for “LLM code repair”/)).toBeVisible()
+})
+
+/** Runs two searches from the search box, then goes back in browser history to the first. */
+async function searchTwiceThenGoBack(page: Page) {
+  await page.goto('/')
+  const box = page.getByRole('searchbox', { name: 'Topic or keywords' })
+  await box.fill('first topic')
+  await box.press('Enter')
+  await expect(page.getByText('2 results for “first topic” from Semantic Scholar')).toBeVisible()
+  await box.fill('second topic')
+  await box.press('Enter')
+  await expect(page.getByText('2 results for “second topic” from Semantic Scholar')).toBeVisible()
+  await page.goBack()
+  await expect(page).toHaveURL(/\/\?q=first\+topic$/)
+  await expect(page.getByText('2 results for “first topic” from Semantic Scholar')).toBeVisible()
+  return box
+}
+
+test('browser back/forward re-runs the search for the query in the URL', async ({ page }) => {
+  await searchTwiceThenGoBack(page)
+  await page.goForward()
+  await expect(page).toHaveURL(/\/\?q=second\+topic$/)
+  await expect(page.getByText('2 results for “second topic” from Semantic Scholar')).toBeVisible()
+})
+
+test('the search box shows the URL query after browser back', async ({ page }) => {
+  // APP BUG: SearchPage copies ?q= into its `draft` state only on mount (src/pages/SearchPage.tsx:15).
+  // Back/forward changes the URL (and the results) but the box keeps showing the newer query.
+  test.fail()
+  const box = await searchTwiceThenGoBack(page)
+  await expect(box).toHaveValue('first topic', { timeout: 2_000 })
 })

@@ -1,0 +1,46 @@
+$ node C:\Users\cgera\Coding\Classes\CS593-ASE\ai-research-assistant\frontend\node_modules\@playwright\test\cli.js test --reporter=list,json,html
+exit code: 0
+
+
+Running 13 tests using 1 worker
+
+  ✓   1 [chromium] › e2e\library.spec.ts:8:1 › upload a PDF, land on its page, and open the stored PDF (684ms)
+  ✓   2 [chromium] › e2e\library.spec.ts:37:1 › rejects non-PDF uploads on the client and on the server (490ms)
+  ✓   3 [chromium] › e2e\library.spec.ts:51:1 › filter the library and remove a paper (780ms)
+  ✓   4 [chromium] › e2e\paper-ai.spec.ts:26:1 › summarize a paper; the summary is cached across reloads (742ms)
+  ✓   5 [chromium] › e2e\paper-ai.spec.ts:43:1 › regenerate asks the backend for a fresh summary and shows it (626ms)
+  ✓   6 [chromium] › e2e\paper-ai.spec.ts:88:1 › ask questions, keep history across reloads, then clear it (1.1s)
+  ✓   7 [chromium] › e2e\paper-ai.spec.ts:138:1 › a failed clear keeps the Q&A history on screen and on the server (640ms)
+  ✘   8 [chromium] › e2e\paper-ai.spec.ts:145:1 › a failed clear tells the user it failed (2.6s)
+  ✓   9 [chromium] › e2e\paper-ai.spec.ts:153:1 › opening a paper that does not exist shows an error (590ms)
+  ✓  10 [chromium] › e2e\search-and-save.spec.ts:8:1 › search, save a paper with a PDF and one without, then see both in the library (926ms)
+  ✓  11 [chromium] › e2e\search-and-save.spec.ts:49:1 › search query survives navigating to a paper and back (659ms)
+  ✓  12 [chromium] › e2e\search-and-save.spec.ts:82:1 › browser back/forward re-runs the search for the query in the URL (545ms)
+  ✘  13 [chromium] › e2e\search-and-save.spec.ts:89:1 › the search box shows the URL query after browser back (2.5s)
+
+  13 passed (18.5s)
+(node:90804) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:70500) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:70500) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+[WebServer] 5:02:14 PM [vite] (client) [Unhandled rejection] Error: database is locked
+[WebServer]  > request src/api/client.ts:18:10
+[WebServer]     16 |        /* non-JSON error body */
+[WebServer]     17 |      }
+[WebServer]     18 |      throw new Error(detail)
+[WebServer]        |            ^
+[WebServer]     19 |    }
+[WebServer]     20 |    return (res.status === 204 ? undefined : await res.json()) as T
+[WebServer]  > clear src/pages/PaperPage.tsx:176:4
+[WebServer] 
+[WebServer] 5:02:14 PM [vite] (client) [Unhandled rejection] Error: database is locked
+[WebServer]  > request src/api/client.ts:18:10
+[WebServer]     16 |        /* non-JSON error body */
+[WebServer]     17 |      }
+[WebServer]     18 |      throw new Error(detail)
+[WebServer]        |            ^
+[WebServer]     19 |    }
+[WebServer]     20 |    return (res.status === 204 ? undefined : await res.json()) as T
+[WebServer]  > clear src/pages/PaperPage.tsx:176:4
+[WebServer] 

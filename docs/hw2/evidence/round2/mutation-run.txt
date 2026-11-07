@@ -1,0 +1,69 @@
+$ C:\Users\cgera\Coding\Classes\CS593-ASE\ai-research-assistant\backend\.venv\Scripts\python.exe C:\Users\cgera\Coding\Classes\CS593-ASE\ai-research-assistant\tools\fault_injection.py --out C:\Users\cgera\Coding\Classes\CS593-ASE\ai-research-assistant\docs\hw2\evidence\round2
+exit code: 0
+
+baseline backend: OK
+baseline frontend: OK
+B01  visible   killed    Context truncation removed (paper text over MAX_CONTEXT_CHARS is sent whole)
+B02  held-out  killed    extract_metadata always drops the year
+B03  visible   killed    extract_metadata copies the title into the abstract field
+B04  held-out  killed    answer() only forwards the last 2 history messages
+B05  visible   killed    OpenAI APIError no longer wrapped as LLMError
+B06  held-out  killed    Hyphenated line breaks not re-joined
+B07  visible   killed    Heuristic year picks the latest year instead of the earliest
+B08  held-out  killed    arXiv-id year computed in the wrong century
+B09  visible   killed    extract_text ignores max_pages
+B10  held-out  killed    Semantic Scholar results never use the arXiv id (breaks cross-provider dedup)
+B11  visible   killed    arXiv ids keep their version suffix (v1, v2...)
+B12  held-out  killed    arXiv search no longer loosens AND to OR when nothing matches
+B13  visible   killed    Semantic Scholar 429 retry checks the wrong status code
+B14  held-out  killed    Semantic Scholar authors missing names are no longer filtered
+B15  visible   killed    Stopwords no longer removed from arXiv queries
+B16  held-out  killed    Save dedup compares the wrong column
+B17  visible   killed    Upload size limit doubled
+B18  held-out  killed    Heuristic metadata overrides LLM metadata on upload
+B19  visible   killed    Deleting a paper leaves its PDF file on disk
+B20  held-out  killed    Deleting a paper leaves its chat messages behind
+B21  visible   killed    Failed PDF download on save is no longer tolerated
+B22  held-out  killed    Summary ignores regenerate=true (always serves cache)
+B23  visible   killed    Abstract preferred over full text for the LLM
+B24  held-out  killed    Chat history returned newest-first
+B25  visible   killed    LLM failure on chat returns 500 instead of 502
+B26  held-out  killed    Search results never marked as already saved
+F01  visible   killed    Server error detail message ignored
+F02  held-out  killed    204 No Content responses parsed as JSON
+F03  visible   killed    JSON requests sent with the wrong HTTP method
+F04  held-out  killed    'N more' authors count is wrong
+F05  visible   killed    Long abstracts no longer truncated
+F06  held-out  killed    Removed paper stays in the library list
+F07  visible   killed    savedIdFor matches the wrong paper
+F08  held-out  killed    Library filter only searches titles
+F09  visible   killed    Client-side PDF check is case-sensitive on the extension
+F10  held-out  killed    Shift+Enter submits the question instead of adding a newline
+F11  visible   killed    Search query not trimmed before submitting
+{
+  "visible": {
+    "killed": 19,
+    "total": 19,
+    "score": 100.0
+  },
+  "held-out": {
+    "killed": 18,
+    "total": 18,
+    "score": 100.0
+  },
+  "all": {
+    "killed": 37,
+    "total": 37,
+    "score": 100.0
+  },
+  "backend": {
+    "killed": 26,
+    "total": 26,
+    "score": 100.0
+  },
+  "frontend": {
+    "killed": 11,
+    "total": 11,
+    "score": 100.0
+  }
+}

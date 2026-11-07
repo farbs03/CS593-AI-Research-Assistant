@@ -1,0 +1,38 @@
+Backend (AST mutants; each line shows the original code and the mutant that your tests did NOT detect):
+- A001 backend/app/config.py:7  `load_dotenv(BACKEND_DIR / '.env')`  ->  `pass`
+- A003 backend/app/config.py:9  `'data'`  ->  `""`
+- A005 backend/app/config.py:11  `'papers.db'`  ->  `""`
+- A007 backend/app/config.py:15  `'muse-spark-1.3'`  ->  `""`
+- A009 backend/app/db.py:13  `SQLModel.metadata.create_all(engine)`  ->  `pass`
+- A011 backend/app/db.py:7  `False`  ->  `True`
+- A019 backend/app/llm.py:49  `12000`  ->  `12001`
+- A027 backend/app/models.py:62  `'pdf_path'`  ->  `""`
+- A039 backend/app/pdf.py:59  `1`  ->  `2`
+- A041 backend/app/pdf.py:70  `1`  ->  `2`
+- A057 backend/app/routes/ai.py:10  `'ai'`  ->  `""`
+- A079 backend/app/search.py:108  `'are'`  ->  `""`
+- A081 backend/app/search.py:108  `'or'`  ->  `""`
+
+Frontend (StrykerJS mutants that survived the Vitest suite):
+- S95 frontend/src/components/PaperCard.tsx:43 StringLiteral: `' '`  ->  `""`
+- S121 frontend/src/library.tsx:34 ArrayDeclaration: `[]`  ->  `["Stryker was here"]`
+- S159 frontend/src/pages/LibraryPage.tsx:13 BooleanLiteral: `false`  ->  `true`
+- S191 frontend/src/pages/LibraryPage.tsx:36 CallExpression: `e.preventDefault()`  ->  `;`
+- S215 frontend/src/pages/LibraryPage.tsx:66 StringLiteral: `''`  ->  `"Stryker was here!"`
+- S217 frontend/src/pages/LibraryPage.tsx:68 CallExpression: `e.preventDefault()`  ->  `;`
+- S223 frontend/src/pages/LibraryPage.tsx:82 OptionalChaining: `inputRef.current?.click`  ->  `inputRef.current.click`
+- S225 frontend/src/pages/LibraryPage.tsx:92 OptionalChaining: `e.target.files?.[0]`  ->  `e.target.files[0]`
+- S237 frontend/src/pages/LibraryPage.tsx:99 ConditionalExpression: `!loading && papers.length === 0`  ->  `true`
+- S267 frontend/src/pages/PaperPage.tsx:24 CallExpression: `setPaper(null)`  ->  `;`
+- S271 frontend/src/pages/PaperPage.tsx:27 ArrayDeclaration: `[id]`  ->  `[]`
+- S337 frontend/src/pages/PaperPage.tsx:138 ArrayDeclaration: `[]`  ->  `["Stryker was here"]`
+- S343 frontend/src/pages/PaperPage.tsx:146 ArrayDeclaration: `[paperId]`  ->  `[]`
+- S371 frontend/src/pages/PaperPage.tsx:170 CallExpression: `e.preventDefault()`  ->  `;`
+- S397 frontend/src/pages/PaperPage.tsx:204 ConditionalExpression: `m.role === 'assistant'`  ->  `true`
+- S417 frontend/src/pages/PaperPage.tsx:237 CallExpression: `e.preventDefault()`  ->  `;`
+- S461 frontend/src/pages/SearchPage.tsx:31 BooleanLiteral: `true`  ->  `false`
+- S489 frontend/src/pages/SearchPage.tsx:82 ConditionalExpression: `i < EXAMPLES.length - 1`  ->  `false`
+- S491 frontend/src/pages/SearchPage.tsx:82 EqualityOperator: `i < EXAMPLES.length - 1`  ->  `i >= EXAMPLES.length - 1`
+- S493 frontend/src/pages/SearchPage.tsx:82 StringLiteral: `', '`  ->  `""`
+- S519 frontend/src/pages/SearchPage.tsx:101 LogicalOperator: `r.external_id ?? r.title`  ->  `r.external_id && r.title`
+- S527 frontend/src/pages/SearchPage.tsx:120 CallExpression: `setError(null)`  ->  `;`

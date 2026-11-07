@@ -122,3 +122,20 @@ export function deferred<T>() {
   })
   return { promise, resolve, reject }
 }
+
+/**
+ * A JSON response for a request the test answers late, plus `read`: a promise that settles once
+ * the page has parsed the body and its own promise callbacks have run. Awaiting it (inside act)
+ * lets a test check deterministically that a late response did NOT change the page.
+ */
+export function lateJsonResponse(body: unknown, status = 200) {
+  const response = jsonResponse(body, status)
+  const read = deferred<void>()
+  const parse = response.json.bind(response)
+  response.json = async () => {
+    const parsed: unknown = await parse()
+    setTimeout(read.resolve, 0) // a macrotask: runs after the page's pending microtasks
+    return parsed
+  }
+  return { response, read: read.promise }
+}

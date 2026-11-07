@@ -159,6 +159,13 @@ def test_heuristic_metadata_text_year_beats_creation_date(make_pdf):
     assert pdf.heuristic_metadata(data)["year"] == 2015
 
 
+def test_heuristic_metadata_year_from_iso_creation_date(make_pdf):
+    # Not every producer follows the PDF date syntax: some write ISO 8601 (e.g. XMP-style
+    # "2018-03-05T12:00:00Z") into the Info dictionary. With no year in the text, that date is used.
+    data = make_pdf([[("Title", 20), ("No year here", 11)]], metadata={"creationDate": "2018-03-05T12:00:00Z"})
+    assert pdf.heuristic_metadata(data)["year"] == 2018
+
+
 @pytest.mark.xfail(
     strict=True,
     reason="APP BUG: YEAR_RE needs word boundaries, so the standard PDF date format "
