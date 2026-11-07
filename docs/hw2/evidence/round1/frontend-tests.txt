@@ -1,0 +1,41 @@
+$ node C:\Users\cgera\Coding\Classes\CS593-ASE\ai-research-assistant\frontend\node_modules\vitest\vitest.mjs run --coverage --coverage.reportsDirectory=C:\Users\cgera\Coding\Classes\CS593-ASE\ai-research-assistant\docs\hw2\evidence\round1\frontend-coverage --reporter=default --reporter=junit --outputFile.junit=C:\Users\cgera\Coding\Classes\CS593-ASE\ai-research-assistant\docs\hw2\evidence\round1\frontend-junit.xml
+exit code: 0
+
+
+ RUN  v5.1.0 C:/Users/cgera/Coding/Classes/CS593-ASE/ai-research-assistant/frontend
+      Coverage enabled with v8
+
+ ✓ src/api/client.test.ts (17 tests) 26ms
+ ✓ src/components/PaperCard.test.tsx (15 tests) 247ms
+ ✓ src/library.test.tsx (11 tests) 794ms
+ ✓ src/App.test.tsx (3 tests) 646ms
+ ✓ src/pages/LibraryPage.test.tsx (20 tests) 2141ms
+   ✓ LibraryPage (20)
+     ✓ filter with no matches shows 0 of N 306ms
+ ✓ src/pages/SearchPage.test.tsx (15 tests) 2524ms
+   ✓ SearchPage (15)
+     ✓ searches on submit, puts the query in the URL and lists results 378ms
+     ✓ marks a result without an external id as saved after saving it 1091ms
+ ✓ src/pages/PaperPage.test.tsx (20 tests) 2422ms
+   ✓ PaperPage chat (11)
+     ✓ asks a typed question, shows pending state, then the answer 554ms
+     ✓ Enter submits but Shift+Enter inserts a newline 407ms
+     ✓ appends follow-up answers after earlier messages 306ms
+
+ Test Files  7 passed (7)
+      Tests  97 passed | 4 expected fail (101)
+   Start at  15:57:05
+   Duration  11.65s (environment 72%, tests 13%, setup 10%, import 4%, worker 1%)
+
+JUNIT report written to C:/Users/cgera/Coding/Classes/CS593-ASE/ai-research-assistant/docs/hw2/evidence/round1/frontend-junit.xml
+ % Coverage report from v8
+No files with missing coverage.
+7 files fully covered.
+1 empty file skipped.
+
+=============================== Coverage summary ===============================
+Statements   : 100% ( 234/234 )
+Branches     : 100% ( 160/160 )
+Functions    : 100% ( 80/80 )
+Lines        : 100% ( 214/214 )
+================================================================================

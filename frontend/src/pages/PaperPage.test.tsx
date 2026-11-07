@@ -2,6 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  calls,
   deferred,
   errorResponse,
   jsonResponse,
@@ -108,12 +109,26 @@ describe('PaperPage details', () => {
     expect(screen.getByRole('link', { name: 'Back to library' })).toHaveAttribute('href', '/library')
   })
 
-  it('shows an error for a non-numeric paper id', async () => {
-    mockFetch((req) =>
-      req.path === '/api/papers' ? jsonResponse([]) : jsonResponse({ detail: [{ msg: 'int' }] }, 422, 'Unprocessable Entity'),
-    )
+  // APP BUG: PaperPage does `Number(useParams().id)` (src/pages/PaperPage.tsx:18) without
+  // validating it, so /papers/abc requests /api/papers/NaN and shows the backend's raw
+  // "422 Unprocessable Entity". An invalid id should be reported as such, without a request.
+  it.fails('rejects a non-numeric paper id without requesting /api/papers/NaN', async () => {
+    const fetch = mockFetch((req) => {
+      if (req.path === '/api/papers') return jsonResponse([])
+      // What the real backend answers for a non-integer id.
+      return jsonResponse(
+        { detail: [{ type: 'int_parsing', loc: ['path', 'paper_id'], msg: 'Input should be a valid integer' }] },
+        422,
+        'Unprocessable Entity',
+      )
+    })
     renderPaper('abc')
-    expect(await screen.findByText("Couldn't open this paper: 422 Unprocessable Entity")).toBeInTheDocument()
+    // The page's error view (with its way back) is shown...
+    expect(await screen.findByRole('link', { name: 'Back to library' })).toBeInTheDocument()
+    // ...without asking the server for a paper id that cannot exist...
+    expect(calls(fetch).filter((c) => c !== 'GET /api/papers')).toEqual([])
+    // ...and without leaking a raw HTTP status line to the user.
+    expect(screen.getByText(/Couldn't open this paper/)).not.toHaveTextContent(/422|Unprocessable|NaN/)
   })
 })
 
@@ -208,10 +223,17 @@ describe('PaperPage chat', () => {
     expect(screen.getByRole('button', { name: 'Clear' })).toBeInTheDocument()
   })
 
-  it('shows an error if chat history cannot be loaded', async () => {
+  // APP BUG: ChatPanel stores history-load failures (src/pages/PaperPage.tsx:145) in the same
+  // `error` state as failed questions and renders it as "Couldn't get an answer: ..."
+  // (PaperPage.tsx:224), although no question was asked. The message should say the history
+  // could not be loaded.
+  it.fails('says the Q&A history could not be loaded when loading it fails', async () => {
     setup({ chat: () => errorResponse(500, 'chat db error') })
     renderPaper()
-    expect(await screen.findByText("Couldn't get an answer: chat db error")).toBeInTheDocument()
+    const message = await within(await waitFor(() => chatPanel())).findByText(/chat db error/)
+    expect(message).not.toHaveTextContent("Couldn't get an answer")
+    expect(message).toHaveTextContent(/load/i)
+    expect(message).toHaveTextContent(/history/i)
   })
 
   it('asks a typed question, shows pending state, then the answer', async () => {
@@ -228,6 +250,7 @@ describe('PaperPage chat', () => {
     })
     renderPaper()
     const box = await screen.findByRole('textbox', { name: 'Your question' })
+    const scrollIntoView = vi.mocked(Element.prototype.scrollIntoView)
     await user.type(box, '  What datasets are used?  ')
     await user.click(screen.getByRole('button', { name: 'Ask' }))
 
@@ -237,6 +260,8 @@ describe('PaperPage chat', () => {
     expect(screen.getByText('What datasets are used?')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ask' })).toBeDisabled()
 
+    // Only count scrolls caused by the answer arriving (not the ones on mount / while pending).
+    scrollIntoView.mockClear()
     answer.resolve(
       jsonResponse([
         makeMessage({ id: 10, paper_id: 7, role: 'user', content: 'What datasets are used?' }),
@@ -246,7 +271,11 @@ describe('PaperPage chat', () => {
     expect(await screen.findByText('WMT 2014 English-German.')).toBeInTheDocument()
     expect(screen.queryByText('Reading the paper…')).not.toBeInTheDocument()
     expect(screen.getAllByText('What datasets are used?')).toHaveLength(1)
-    expect(Element.prototype.scrollIntoView).toHaveBeenCalled()
+    // The log scrolled (smoothly) to its end marker, which now sits after the new answer.
+    const log = chatPanel().querySelector('.chat-log')!
+    expect(scrollIntoView).toHaveBeenLastCalledWith({ behavior: 'smooth', block: 'nearest' })
+    expect(scrollIntoView.mock.contexts.at(-1)).toBe(log.lastElementChild)
+    expect(log.lastElementChild!.previousElementSibling).toHaveTextContent('WMT 2014 English-German.')
   })
 
   it('clicking a suggested question asks it', async () => {

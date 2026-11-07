@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import {
@@ -92,6 +92,8 @@ describe('SearchPage', () => {
     await user.type(box, '    ')
     expect(screen.getByRole('button', { name: 'Search' })).toBeDisabled()
     await user.type(box, '{Enter}')
+    // Even a forced submit (bypassing the disabled button) must not run an empty search.
+    fireEvent.submit(screen.getByRole('search'))
     expect(searchCalls(fetch)).toEqual([])
     expect(screen.getByTestId('location')).toHaveTextContent(/^\/$/)
   })
@@ -182,6 +184,57 @@ describe('SearchPage', () => {
     const link = await screen.findByRole('link', { name: /Open in library/ })
     expect(link).toHaveAttribute('href', '/papers/9')
     expect(screen.queryByRole('button', { name: 'Save to library' })).not.toBeInTheDocument()
+  })
+
+  // The API contract (types.ts / backend SearchResult) allows external_id to be null.
+  const NO_ID_RESULTS: SearchResponse = {
+    provider: 'semantic_scholar',
+    results: [
+      makeResult({ external_id: null, title: 'Untracked One' }),
+      makeResult({ external_id: null, title: 'Untracked Two' }),
+    ],
+  }
+
+  it('lists and saves results that have no external id', async () => {
+    const user = userEvent.setup()
+    let posted: unknown
+    setup({
+      search: () => jsonResponse(NO_ID_RESULTS),
+      extra: (req) => {
+        if (req.method === 'POST' && req.path === '/api/papers') {
+          posted = req.json
+          return jsonResponse(makePaper({ id: 61, external_id: null, title: 'Untracked One' }), 201)
+        }
+      },
+    })
+    renderPage(<SearchPage />, { route: '/?q=x' })
+    expect(await screen.findByText('2 results for “x” from Semantic Scholar')).toBeInTheDocument()
+    expect(screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual([
+      'Untracked One',
+      'Untracked Two',
+    ])
+    const card = screen.getByRole('heading', { name: 'Untracked One' }).closest('article')!
+    await user.click(within(card).getByRole('button', { name: 'Save to library' }))
+    await waitFor(() => expect(posted).toEqual({ ...NO_ID_RESULTS.results[0] }))
+  })
+
+  // APP BUG: ResultEntry decides "saved" only via savedIdFor(external_id) or the server's saved_id
+  // (src/pages/SearchPage.tsx:116). For a result without an external_id neither ever matches, so
+  // after a successful save the card still offers "Save to library" (and the backend never dedupes
+  // id-less papers, so each click adds another copy).
+  it.fails('marks a result without an external id as saved after saving it', async () => {
+    const user = userEvent.setup()
+    setup({
+      search: () => jsonResponse(NO_ID_RESULTS),
+      extra: (req) =>
+        req.method === 'POST' && req.path === '/api/papers'
+          ? jsonResponse(makePaper({ id: 61, external_id: null, title: 'Untracked One' }), 201)
+          : undefined,
+    })
+    renderPage(<SearchPage />, { route: '/?q=x' })
+    const card = (await screen.findByRole('heading', { name: 'Untracked One' })).closest('article')!
+    await user.click(within(card).getByRole('button', { name: 'Save to library' }))
+    expect(await within(card).findByRole('link', { name: /Open in library/ })).toHaveAttribute('href', '/papers/61')
   })
 
   it('marks results that are in the local library even if the server did not', async () => {

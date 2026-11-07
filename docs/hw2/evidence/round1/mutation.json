@@ -1,0 +1,486 @@
+{
+  "summary": {
+    "visible": {
+      "killed": 19,
+      "total": 19,
+      "score": 100.0
+    },
+    "held-out": {
+      "killed": 18,
+      "total": 18,
+      "score": 100.0
+    },
+    "all": {
+      "killed": 37,
+      "total": 37,
+      "score": 100.0
+    },
+    "backend": {
+      "killed": 26,
+      "total": 26,
+      "score": 100.0
+    },
+    "frontend": {
+      "killed": 11,
+      "total": 11,
+      "score": 100.0
+    }
+  },
+  "results": [
+    {
+      "id": "B01",
+      "suite": "backend",
+      "visibility": "visible",
+      "file": "backend/app/llm.py",
+      "desc": "Context truncation removed (paper text over MAX_CONTEXT_CHARS is sent whole)",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_llm.py::test_paper_context_truncates_long_text"
+      ],
+      "seconds": 6.3
+    },
+    {
+      "id": "B02",
+      "suite": "backend",
+      "visibility": "held-out",
+      "file": "backend/app/llm.py",
+      "desc": "extract_metadata always drops the year",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_uses_llm_metadata"
+      ],
+      "seconds": 5.3
+    },
+    {
+      "id": "B03",
+      "suite": "backend",
+      "visibility": "visible",
+      "file": "backend/app/llm.py",
+      "desc": "extract_metadata copies the title into the abstract field",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_uses_llm_metadata"
+      ],
+      "seconds": 6.0
+    },
+    {
+      "id": "B04",
+      "suite": "backend",
+      "visibility": "held-out",
+      "file": "backend/app/llm.py",
+      "desc": "answer() only forwards the last 2 history messages",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_follow_up_questions_include_prior_turns"
+      ],
+      "seconds": 3.9
+    },
+    {
+      "id": "B05",
+      "suite": "backend",
+      "visibility": "visible",
+      "file": "backend/app/llm.py",
+      "desc": "OpenAI APIError no longer wrapped as LLMError",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_llm.py::test_chat_wraps_api_error_as_llm_error"
+      ],
+      "seconds": 6.3
+    },
+    {
+      "id": "B06",
+      "suite": "backend",
+      "visibility": "held-out",
+      "file": "backend/app/pdf.py",
+      "desc": "Hyphenated line breaks not re-joined",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_pdf.py::test_clean_rejoins_hyphen_only_before_lowercase"
+      ],
+      "seconds": 7.6
+    },
+    {
+      "id": "B07",
+      "suite": "backend",
+      "visibility": "visible",
+      "file": "backend/app/pdf.py",
+      "desc": "Heuristic year picks the latest year instead of the earliest",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_pdf.py::test_heuristic_metadata_year_is_earliest_plausible_near_top"
+      ],
+      "seconds": 7.6
+    },
+    {
+      "id": "B08",
+      "suite": "backend",
+      "visibility": "held-out",
+      "file": "backend/app/pdf.py",
+      "desc": "arXiv-id year computed in the wrong century",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_merges_llm_and_heuristic_metadata"
+      ],
+      "seconds": 5.2
+    },
+    {
+      "id": "B09",
+      "suite": "backend",
+      "visibility": "visible",
+      "file": "backend/app/pdf.py",
+      "desc": "extract_text ignores max_pages",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_llm_only_sees_first_two_pages"
+      ],
+      "seconds": 5.1
+    },
+    {
+      "id": "B10",
+      "suite": "backend",
+      "visibility": "held-out",
+      "file": "backend/app/search.py",
+      "desc": "Semantic Scholar results never use the arXiv id (breaks cross-provider dedup)",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_s2_prefers_arxiv_id_and_derives_pdf_url"
+      ],
+      "seconds": 7.8
+    },
+    {
+      "id": "B11",
+      "suite": "backend",
+      "visibility": "visible",
+      "file": "backend/app/search.py",
+      "desc": "arXiv ids keep their version suffix (v1, v2...)",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_parse_arxiv_maps_entries"
+      ],
+      "seconds": 9.6
+    },
+    {
+      "id": "B12",
+      "suite": "backend",
+      "visibility": "held-out",
+      "file": "backend/app/search.py",
+      "desc": "arXiv search no longer loosens AND to OR when nothing matches",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_arxiv_search_falls_back_to_or_when_and_finds_nothing"
+      ],
+      "seconds": 10.0
+    },
+    {
+      "id": "B13",
+      "suite": "backend",
+      "visibility": "visible",
+      "file": "backend/app/search.py",
+      "desc": "Semantic Scholar 429 retry checks the wrong status code",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_s2_retries_once_after_429"
+      ],
+      "seconds": 9.2
+    },
+    {
+      "id": "B14",
+      "suite": "backend",
+      "visibility": "held-out",
+      "file": "backend/app/search.py",
+      "desc": "Semantic Scholar authors missing names are no longer filtered",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_s2_handles_missing_optional_fields"
+      ],
+      "seconds": 8.1
+    },
+    {
+      "id": "B15",
+      "suite": "backend",
+      "visibility": "visible",
+      "file": "backend/app/search.py",
+      "desc": "Stopwords no longer removed from arXiv queries",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_arxiv_query_builder[the"
+      ],
+      "seconds": 9.7
+    },
+    {
+      "id": "B16",
+      "suite": "backend",
+      "visibility": "held-out",
+      "file": "backend/app/routes/papers.py",
+      "desc": "Save dedup compares the wrong column",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_save_is_idempotent_by_external_id"
+      ],
+      "seconds": 5.2
+    },
+    {
+      "id": "B17",
+      "suite": "backend",
+      "visibility": "visible",
+      "file": "backend/app/routes/papers.py",
+      "desc": "Upload size limit doubled",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_rejects_pdf_over_50_mb"
+      ],
+      "seconds": 5.6
+    },
+    {
+      "id": "B18",
+      "suite": "backend",
+      "visibility": "held-out",
+      "file": "backend/app/routes/papers.py",
+      "desc": "Heuristic metadata overrides LLM metadata on upload",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_uses_llm_metadata"
+      ],
+      "seconds": 5.0
+    },
+    {
+      "id": "B19",
+      "suite": "backend",
+      "visibility": "visible",
+      "file": "backend/app/routes/papers.py",
+      "desc": "Deleting a paper leaves its PDF file on disk",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_delete_removes_paper_chat_and_file"
+      ],
+      "seconds": 5.7
+    },
+    {
+      "id": "B20",
+      "suite": "backend",
+      "visibility": "held-out",
+      "file": "backend/app/routes/papers.py",
+      "desc": "Deleting a paper leaves its chat messages behind",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_delete_removes_paper_chat_and_file"
+      ],
+      "seconds": 5.7
+    },
+    {
+      "id": "B21",
+      "suite": "backend",
+      "visibility": "visible",
+      "file": "backend/app/routes/papers.py",
+      "desc": "Failed PDF download on save is no longer tolerated",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_save_falls_back_to_abstract_when_pdf_unavailable[http-404]"
+      ],
+      "seconds": 4.4
+    },
+    {
+      "id": "B22",
+      "suite": "backend",
+      "visibility": "held-out",
+      "file": "backend/app/routes/ai.py",
+      "desc": "Summary ignores regenerate=true (always serves cache)",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_summary_regenerate_overwrites_cache"
+      ],
+      "seconds": 3.4
+    },
+    {
+      "id": "B23",
+      "suite": "backend",
+      "visibility": "visible",
+      "file": "backend/app/routes/ai.py",
+      "desc": "Abstract preferred over full text for the LLM",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_summary_generated_from_full_text_and_persisted"
+      ],
+      "seconds": 3.4
+    },
+    {
+      "id": "B24",
+      "suite": "backend",
+      "visibility": "held-out",
+      "file": "backend/app/routes/ai.py",
+      "desc": "Chat history returned newest-first",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_ask_returns_and_persists_message_pair"
+      ],
+      "seconds": 3.5
+    },
+    {
+      "id": "B25",
+      "suite": "backend",
+      "visibility": "visible",
+      "file": "backend/app/routes/ai.py",
+      "desc": "LLM failure on chat returns 500 instead of 502",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_ask_llm_failure_is_502_and_nothing_saved"
+      ],
+      "seconds": 3.8
+    },
+    {
+      "id": "B26",
+      "suite": "backend",
+      "visibility": "held-out",
+      "file": "backend/app/routes/search.py",
+      "desc": "Search results never marked as already saved",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_search.py::test_search_marks_results_already_in_library"
+      ],
+      "seconds": 5.9
+    },
+    {
+      "id": "F01",
+      "suite": "frontend",
+      "visibility": "visible",
+      "file": "frontend/src/api/client.ts",
+      "desc": "Server error detail message ignored",
+      "status": "killed",
+      "killed_by": [
+        "exposes load errors and stops loading",
+        "src/library.test.tsx > LibraryProvider > exposes load errors and stops loading"
+      ],
+      "seconds": 10.9
+    },
+    {
+      "id": "F02",
+      "suite": "frontend",
+      "visibility": "held-out",
+      "file": "frontend/src/api/client.ts",
+      "desc": "204 No Content responses parsed as JSON",
+      "status": "killed",
+      "killed_by": [
+        "returns undefined for 204 No Content",
+        "src/api/client.test.ts > request error handling > returns undefined for 204 No Content"
+      ],
+      "seconds": 9.6
+    },
+    {
+      "id": "F03",
+      "suite": "frontend",
+      "visibility": "visible",
+      "file": "frontend/src/api/client.ts",
+      "desc": "JSON requests sent with the wrong HTTP method",
+      "status": "killed",
+      "killed_by": [
+        "savePaper POSTs the paper as JSON",
+        "src/api/client.test.ts > endpoints > savePaper POSTs the paper as JSON"
+      ],
+      "seconds": 8.1
+    },
+    {
+      "id": "F04",
+      "suite": "frontend",
+      "visibility": "held-out",
+      "file": "frontend/src/components/PaperCard.tsx",
+      "desc": "'N more' authors count is wrong",
+      "status": "killed",
+      "killed_by": [
+        "shows at most six authors and counts the rest",
+        "src/components/PaperCard.test.tsx > PaperCard > shows at most six authors and counts the rest"
+      ],
+      "seconds": 8.3
+    },
+    {
+      "id": "F05",
+      "suite": "frontend",
+      "visibility": "visible",
+      "file": "frontend/src/components/PaperCard.tsx",
+      "desc": "Long abstracts no longer truncated",
+      "status": "killed",
+      "killed_by": [
+        "truncates long abstracts at 420 chars and toggles the full text",
+        "src/components/PaperCard.test.tsx > PaperCard > truncates long abstracts at 420 chars and toggles the full text"
+      ],
+      "seconds": 9.0
+    },
+    {
+      "id": "F06",
+      "suite": "frontend",
+      "visibility": "held-out",
+      "file": "frontend/src/library.tsx",
+      "desc": "Removed paper stays in the library list",
+      "status": "killed",
+      "killed_by": [
+        "remove deletes the paper and drops it from the list",
+        "src/library.test.tsx > LibraryProvider > remove deletes the paper and drops it from the list"
+      ],
+      "seconds": 8.5
+    },
+    {
+      "id": "F07",
+      "suite": "frontend",
+      "visibility": "visible",
+      "file": "frontend/src/library.tsx",
+      "desc": "savedIdFor matches the wrong paper",
+      "status": "killed",
+      "killed_by": [
+        "savedIdFor maps external ids to saved paper ids",
+        "src/library.test.tsx > LibraryProvider > savedIdFor maps external ids to saved paper ids"
+      ],
+      "seconds": 8.6
+    },
+    {
+      "id": "F08",
+      "suite": "frontend",
+      "visibility": "held-out",
+      "file": "frontend/src/pages/LibraryPage.tsx",
+      "desc": "Library filter only searches titles",
+      "status": "killed",
+      "killed_by": [
+        "filters by author (case-insensitive)",
+        "src/pages/LibraryPage.test.tsx > LibraryPage > filters by author (case-insensitive)"
+      ],
+      "seconds": 8.5
+    },
+    {
+      "id": "F09",
+      "suite": "frontend",
+      "visibility": "visible",
+      "file": "frontend/src/pages/LibraryPage.tsx",
+      "desc": "Client-side PDF check is case-sensitive on the extension",
+      "status": "killed",
+      "killed_by": [
+        "accepts a .pdf file even without a PDF mime type",
+        "src/pages/LibraryPage.test.tsx > LibraryPage > accepts a .pdf file even without a PDF mime type"
+      ],
+      "seconds": 10.8
+    },
+    {
+      "id": "F10",
+      "suite": "frontend",
+      "visibility": "held-out",
+      "file": "frontend/src/pages/PaperPage.tsx",
+      "desc": "Shift+Enter submits the question instead of adding a newline",
+      "status": "killed",
+      "killed_by": [
+        "Enter submits but Shift+Enter inserts a newline",
+        "src/pages/PaperPage.test.tsx > PaperPage chat > Enter submits but Shift+Enter inserts a newline"
+      ],
+      "seconds": 10.3
+    },
+    {
+      "id": "F11",
+      "suite": "frontend",
+      "visibility": "visible",
+      "file": "frontend/src/pages/SearchPage.tsx",
+      "desc": "Search query not trimmed before submitting",
+      "status": "killed",
+      "killed_by": [
+        "searches on submit, puts the query in the URL and lists results",
+        "src/pages/SearchPage.test.tsx > SearchPage > searches on submit, puts the query in the URL and lists results"
+      ],
+      "seconds": 11.1
+    }
+  ]
+}

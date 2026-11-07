@@ -19,10 +19,28 @@ describe('request error handling', () => {
     await expect(api.getPaper(9)).rejects.toThrow('Paper not found')
   })
 
-  it('falls back to status and status text when detail is not a string', async () => {
-    // FastAPI validation errors return detail as a list.
-    mockFetch(() => jsonResponse({ detail: [{ msg: 'field required' }] }, 422, 'Unprocessable Entity'))
-    await expect(api.search('x')).rejects.toThrow('422 Unprocessable Entity')
+  // APP BUG: request() (src/api/client.ts:14) only uses `detail` when it is a string. FastAPI
+  // validation errors (422) send `detail` as a list of {loc, msg, type}, so the user only ever
+  // sees "422 Unprocessable Entity" and never what was actually wrong.
+  it.fails('shows the messages from a FastAPI validation error (detail list)', async () => {
+    mockFetch(() =>
+      jsonResponse(
+        {
+          detail: [
+            { type: 'int_parsing', loc: ['query', 'limit'], msg: 'Input should be a valid integer', input: 'x' },
+          ],
+        },
+        422,
+        'Unprocessable Entity',
+      ),
+    )
+    await expect(api.search('x')).rejects.toThrow('Input should be a valid integer')
+  })
+
+  it('falls back to status and status text when a JSON error body has no detail', async () => {
+    // e.g. a proxy or gateway answering with its own JSON error shape.
+    mockFetch(() => jsonResponse({ error: 'upstream timed out' }, 504, 'Gateway Timeout'))
+    await expect(api.listPapers()).rejects.toThrow(/^504 Gateway Timeout$/)
   })
 
   it('falls back to status and status text for non-JSON error bodies', async () => {

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { resetLibrary } from './helpers'
+import { answerNextDialog, resetLibrary } from './helpers'
 
 const SAVED_PAPER = {
   source: 'semantic_scholar',
@@ -37,12 +37,55 @@ test('summarize a paper; the summary is cached across reloads', async ({ page })
 
   await page.reload()
   await expect(page.getByText('E2E fake summary of the paper.')).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Regenerate' })).toBeEnabled()
-  await page.getByRole('button', { name: 'Regenerate' }).click()
-  await expect(page.getByText('E2E fake summary of the paper.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Summarize paper' })).toHaveCount(0)
 })
 
-test('ask questions, keep history across reloads, then clear it', async ({ page }) => {
+test('regenerate asks the backend for a fresh summary and shows it', async ({ page, request }) => {
+  const first = await request.post(`/api/papers/${paperId}/summary`)
+  expect(first.status()).toBe(200)
+  const cached = ((await first.json()) as { summary: string }).summary
+
+  // The stub LLM always writes the same summary, so a no-op Regenerate would look identical.
+  // Let the request reach the real backend, record what it answered, hold the response so the
+  // in-flight state is observable, then hand the page a recognisably different summary: the UI
+  // must replace the old summary with whatever the regenerate call returns.
+  const backend: { status: number; body: string }[] = []
+  let release!: () => void
+  const held = new Promise<void>((resolve) => (release = resolve))
+  await page.route(
+    (url) => url.pathname === `/api/papers/${paperId}/summary` && url.searchParams.get('regenerate') === 'true',
+    async (route) => {
+      const response = await route.fetch()
+      const body = await response.text()
+      backend.push({ status: response.status(), body })
+      await held
+      try {
+        const { summary } = JSON.parse(body) as { summary: string }
+        await route.fulfill({ response, json: { summary: summary.replace('E2E fake summary', 'Regenerated E2E summary') } })
+      } catch {
+        await route.fulfill({ response }) // pass anything unexpected through untouched
+      }
+    },
+  )
+
+  await page.goto(`/papers/${paperId}`)
+  await expect(page.getByText('E2E fake summary of the paper.')).toBeVisible()
+  await page.getByRole('button', { name: 'Regenerate' }).click()
+  await expect(page.getByRole('button', { name: 'Regenerating…' })).toBeDisabled()
+  // The page still shows the old summary while waiting; only one regenerate request was sent.
+  await expect(page.getByText('E2E fake summary of the paper.')).toBeVisible()
+  await expect
+    .poll(() => backend.map(({ status, body }) => ({ status, json: JSON.parse(body) as unknown })))
+    .toEqual([{ status: 200, json: { summary: cached } }])
+  release()
+
+  await expect(page.getByText('Regenerated E2E summary of the paper.')).toBeVisible()
+  await expect(page.getByText('E2E fake summary of the paper.')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Regenerate' })).toBeEnabled()
+  expect(backend).toHaveLength(1)
+})
+
+test('ask questions, keep history across reloads, then clear it', async ({ page, request }) => {
   await page.goto(`/papers/${paperId}`)
   const chat = page.getByRole('complementary', { name: 'Questions about this paper' })
   await expect(chat.getByText('Ask anything, or start with one of these:')).toBeVisible()
@@ -61,12 +104,11 @@ test('ask questions, keep history across reloads, then clear it', async ({ page 
   await expect(chat.locator('.msg')).toHaveCount(4)
   await expect(chat.locator('.msg').first()).toHaveText('What datasets are used?')
 
-  page.once('dialog', (d) => {
-    expect(d.message()).toBe('Clear this Q&A history?')
-    void d.accept()
-  })
+  const dialog = answerNextDialog(page, 'accept')
   await chat.getByRole('button', { name: 'Clear' }).click()
+  await expect.poll(() => dialog).toEqual(['Clear this Q&A history?'])
   await expect(chat.locator('.msg')).toHaveCount(0)
+  expect(await (await request.get(`/api/papers/${paperId}/chat`)).json()).toEqual([])
   await expect(chat.getByText('Ask anything, or start with one of these:')).toBeVisible()
 
   await page.reload()

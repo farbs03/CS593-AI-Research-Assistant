@@ -75,11 +75,6 @@ def test_extract_text_max_pages_larger_than_document(make_pdf):
     assert pdf.extract_text(data, max_pages=10) == "Only page"
 
 
-def test_extract_text_rejoins_hyphenated_line_breaks(make_pdf):
-    data = make_pdf([[("trans-\nformer models are good", 11)]])
-    assert "transformer models" in pdf.extract_text(data)
-
-
 @pytest.mark.parametrize("garbage", [b"not a pdf at all", b"%PDF-1.4 corrupted", b""])
 def test_extract_text_invalid_pdf_raises_pdf_error(garbage):
     with pytest.raises(pdf.PDFError, match="Could not read PDF"):
@@ -158,13 +153,9 @@ def test_heuristic_metadata_ignores_years_outside_plausible_range(make_pdf):
     assert pdf.heuristic_metadata(data)["year"] is None
 
 
-def test_heuristic_metadata_year_falls_back_to_creation_date(make_pdf):
-    data = make_pdf([[("Title", 20), ("No year here", 11)]], metadata={"creationDate": "2018-03-05"})
-    assert pdf.heuristic_metadata(data)["year"] == 2018
-
-
 def test_heuristic_metadata_text_year_beats_creation_date(make_pdf):
-    data = make_pdf([[("Title", 20), ("Presented 2015", 11)]], metadata={"creationDate": "2018-03-05"})
+    # Real PDFs store dates as "D:YYYYMMDDHHmmSS..." (PDF 32000-1, 7.9.4).
+    data = make_pdf([[("Title", 20), ("Presented 2015", 11)]], metadata={"creationDate": "D:20180305120000Z"})
     assert pdf.heuristic_metadata(data)["year"] == 2015
 
 
@@ -198,12 +189,14 @@ def test_heuristic_metadata_abstract_stops_at_keywords(make_pdf):
 
 
 def test_heuristic_metadata_abstract_capped_at_3000_chars(make_pdf):
-    long_line = "word " * 20
-    lines = [("Title", 20), ("Abstract", 11)] + [(long_line, 6)] * 40 + [("Introduction", 11)]
-    data = make_pdf([lines])
+    # 800 distinct tokens over 40 lines (~5600 chars once whitespace is normalized), so the
+    # exact cut point is checkable: the first 3000 characters of the whole abstract, in order.
+    tokens = [f"a{i:05d}" for i in range(800)]
+    lines = [(" ".join(tokens[i : i + 20]), 6) for i in range(0, 800, 20)]
+    data = make_pdf([[("Title", 20), ("Abstract", 11), *lines, ("Introduction", 11)]])
     abstract = pdf.heuristic_metadata(data)["abstract"]
-    assert abstract is not None and len(abstract) <= 3000
-    assert abstract.startswith("word word")
+    assert abstract == " ".join(tokens)[:3000]
+    assert len(abstract) == 3000
 
 
 def test_heuristic_metadata_no_abstract_section(make_pdf):

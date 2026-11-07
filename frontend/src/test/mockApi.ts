@@ -1,5 +1,5 @@
 // Test helpers: a routed fetch mock (so the real api client is exercised) and data factories.
-import { afterEach, vi } from 'vitest'
+import { afterEach, beforeEach, vi } from 'vitest'
 import type { ChatMessage, Paper, SearchResult } from '../types'
 
 afterEach(() => {
@@ -57,7 +57,13 @@ export function mockFetch(handler: Handler) {
 export const calls = (fn: ReturnType<typeof mockFetch>) =>
   fn.mock.calls.map(([input, init]) => `${((init as RequestInit | undefined)?.method ?? 'GET').toUpperCase()} ${String(input)}`)
 
-let nextId = 1
+// Auto-assigned ids restart for every test, so a test's data never depends on which tests ran
+// before it (or in what order). They start high to stay clear of the small explicit ids tests use.
+const FIRST_AUTO_ID = 1000
+let nextId = FIRST_AUTO_ID
+beforeEach(() => {
+  nextId = FIRST_AUTO_ID
+})
 
 export function makePaper(over: Partial<Paper> = {}): Paper {
   const id = over.id ?? nextId++

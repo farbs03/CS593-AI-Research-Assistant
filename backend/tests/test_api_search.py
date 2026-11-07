@@ -1,9 +1,9 @@
-"""API tests for /api/search and /api/health, plus the to_read() model mapping."""
+"""API tests for /api/search and /api/health."""
 
 import pytest
 
 import app.routes.search
-from app.models import Paper, SearchResult, to_read
+from app.models import SearchResult
 from app.search import SearchError
 
 
@@ -89,16 +89,6 @@ def test_cors_allows_vite_dev_origin(client):
 def test_cors_rejects_other_origins(client):
     r = client.get("/api/health", headers={"Origin": "https://evil.example"})
     assert "access-control-allow-origin" not in r.headers
-
-
-def test_to_read_hides_full_text_and_reports_pdf():
-    p = Paper(id=1, source="upload", title="T", full_text="huge", pdf_path="abc.pdf")
-    read = to_read(p)
-    dumped = read.model_dump()
-    assert "full_text" not in dumped and "pdf_path" not in dumped
-    assert read.has_pdf is True
-    assert read.text_status == "abstract_only"
-    assert to_read(Paper(id=2, source="arxiv", title="U")).has_pdf is False
 
 
 import app.main  # noqa: E402  (used by test_health)

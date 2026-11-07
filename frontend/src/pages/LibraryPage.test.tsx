@@ -1,6 +1,8 @@
-import { fireEvent, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, expect, it, vi } from 'vitest'
+import { LibraryProvider, useLibrary } from '../library'
 import {
   deferred,
   errorResponse,
@@ -10,7 +12,7 @@ import {
   noContent,
   type Handler,
 } from '../test/mockApi'
-import { renderPage } from '../test/renderPage'
+import { LocationProbe, renderPage } from '../test/renderPage'
 import type { Paper } from '../types'
 import LibraryPage from './LibraryPage'
 
@@ -115,6 +117,40 @@ describe('LibraryPage', () => {
 
     uploadReq.resolve(jsonResponse(makePaper({ id: 55, source: 'upload' }), 201))
     await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/papers/55'))
+  })
+
+  it('an upload that finishes after the user left the page still lands in the library', async () => {
+    const user = userEvent.setup()
+    const uploadReq = deferred<Response>()
+    setup([], (req) => (req.path === '/api/papers/upload' ? uploadReq.promise : undefined))
+    function LibraryTitles() {
+      const { papers } = useLibrary()
+      return <ul aria-label="library titles">{papers.map((p) => <li key={p.id}>{p.title}</li>)}</ul>
+    }
+    render(
+      <MemoryRouter initialEntries={['/library']}>
+        <LibraryProvider>
+          <Routes>
+            <Route path="/library" element={<LibraryPage />} />
+            <Route path="*" element={<LibraryTitles />} />
+          </Routes>
+          <LocationProbe />
+        </LibraryProvider>
+      </MemoryRouter>,
+    )
+    await screen.findByText(/Your library is empty/)
+    await user.upload(fileInput(), pdfFile('slow.pdf'))
+    await screen.findByText(/Reading/)
+
+    // Leave the Library page while the upload is still in flight (LibraryPage unmounts).
+    await user.click(screen.getByRole('link', { name: 'Search for papers' }))
+    expect(screen.getByTestId('location')).toHaveTextContent(/^\/$/)
+    expect(fileInput()).toBeNull()
+
+    uploadReq.resolve(jsonResponse(makePaper({ id: 56, title: 'Slow Upload', source: 'upload' }), 201))
+    const titles = await screen.findByRole('list', { name: 'library titles' })
+    await waitFor(() => expect(within(titles).getAllByRole('listitem').map((li) => li.textContent)).toEqual(['Slow Upload']))
+    expect(screen.queryByText(/Upload failed/)).not.toBeInTheDocument()
   })
 
   it('the Upload PDF button opens the file picker', async () => {

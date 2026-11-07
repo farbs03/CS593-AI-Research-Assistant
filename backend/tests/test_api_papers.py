@@ -8,6 +8,7 @@ import pytest
 import respx
 from sqlmodel import select
 
+import app.pdf
 import app.routes.papers
 from app.models import ChatMessage, Paper
 
@@ -81,7 +82,10 @@ def test_get_missing_paper_404(client):
 
 
 def test_get_paper_non_integer_id_422(client):
-    assert client.get("/api/papers/abc").status_code == 422
+    r = client.get("/api/papers/abc")
+    assert r.status_code == 422
+    (err,) = r.json()["detail"]
+    assert err["loc"] == ["path", "paper_id"]
 
 
 # ---------------------------------------------------------------- save
@@ -184,10 +188,13 @@ def test_save_ignores_client_supplied_server_fields(client, session):
 
 
 @pytest.mark.parametrize("missing", ["title", "source"])
-def test_save_requires_title_and_source(client, missing):
+def test_save_requires_title_and_source(client, session, missing):
     body = search_result()
     del body[missing]
-    assert client.post("/api/papers", json=body).status_code == 422
+    r = client.post("/api/papers", json=body)
+    assert r.status_code == 422
+    assert [e["loc"] for e in r.json()["detail"]] == [["body", missing]]
+    assert session.exec(select(Paper)).all() == []
 
 
 def test_save_minimal_body_defaults(client):
@@ -284,27 +291,48 @@ def test_upload_rejects_non_pdf(client, upload_dir, fake_llm, data):
     assert fake_llm.calls == []
 
 
-def test_upload_rejects_oversized_pdf(client, monkeypatch, upload_dir, fake_llm, make_pdf):
-    data = make_pdf()
-    monkeypatch.setattr(app.routes.papers, "MAX_UPLOAD_BYTES", len(data) - 1)
-    r = upload(client, data)
+def test_upload_rejects_pdf_over_50_mb(client, session, upload_dir, fake_llm):
+    # The real limit (no patching): one byte over 50 MiB is refused before any parsing.
+    header = b"%PDF-1.4\n"
+    data = header + b"\0" * (50 * 1024 * 1024 + 1 - len(header))
+    r = upload(client, data, filename="huge.pdf")
     assert r.status_code == 413
-    assert "50 MB" in r.json()["detail"]
+    assert r.json() == {"detail": "PDF is larger than 50 MB"}
     assert list(upload_dir.iterdir()) == []
+    assert session.exec(select(Paper)).all() == []
+    assert fake_llm.calls == []
 
 
-def test_upload_accepts_pdf_exactly_at_size_limit(client, monkeypatch, fake_llm, make_pdf):
+@pytest.mark.parametrize(("slack", "status"), [(0, 201), (-1, 413)], ids=["at-limit", "one-byte-over"])
+def test_upload_size_limit_boundary(client, monkeypatch, upload_dir, fake_llm, make_pdf, slack, status):
+    # Shrink the limit around a real PDF to check the comparison is "> limit", not ">= limit".
     data = make_pdf()
-    monkeypatch.setattr(app.routes.papers, "MAX_UPLOAD_BYTES", len(data))
-    assert upload(client, data).status_code == 201
+    monkeypatch.setattr(app.routes.papers, "MAX_UPLOAD_BYTES", len(data) + slack)
+    assert upload(client, data).status_code == status
+    assert len(list(upload_dir.iterdir())) == (1 if status == 201 else 0)
 
 
-def test_upload_size_limit_is_50_mb():
-    assert app.routes.papers.MAX_UPLOAD_BYTES == 50 * 1024 * 1024
+def test_upload_requires_file_field(client, session):
+    r = client.post("/api/papers/upload")
+    assert r.status_code == 422
+    assert [e["loc"] for e in r.json()["detail"]] == [["body", "file"]]
+    assert session.exec(select(Paper)).all() == []
 
 
-def test_upload_requires_file_field(client):
-    assert client.post("/api/papers/upload").status_code == 422
+def test_upload_unreadable_pdf_error_is_400(client, session, monkeypatch, upload_dir, fake_llm, make_pdf):
+    # Contract of upload_paper: a PDFError from parsing becomes a 400 carrying its message, and
+    # nothing is stored. (With real input this branch is only reached once the APP BUGs below
+    # are fixed, because pymupdf errors escape heuristic_metadata unwrapped.)
+    def unreadable(data):
+        raise app.pdf.PDFError("Could not read PDF: broken xref")
+
+    monkeypatch.setattr(app.pdf, "heuristic_metadata", unreadable)
+    r = upload(client, make_pdf())
+    assert r.status_code == 400
+    assert r.json() == {"detail": "Could not read PDF: broken xref"}
+    assert list(upload_dir.iterdir()) == []
+    assert session.exec(select(Paper)).all() == []
+    assert fake_llm.calls == []
 
 
 @pytest.mark.xfail(
@@ -313,10 +341,30 @@ def test_upload_requires_file_field(client):
     "so a corrupt file that starts with %PDF raises pymupdf.FileDataError, which upload_paper "
     "does not catch -> 500 Internal Server Error instead of a 400.",
 )
-def test_upload_corrupt_pdf_returns_400(client, fake_llm, upload_dir):
+def test_upload_corrupt_pdf_returns_400(client, session, fake_llm, upload_dir):
     r = upload(client, b"%PDF-1.7\nthis is not really a pdf")
     assert r.status_code == 400
     assert list(upload_dir.iterdir()) == []
+    assert session.exec(select(Paper)).all() == []
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="APP BUG: a password-protected PDF makes heuristic_metadata (app/pdf.py:44-48) raise a "
+    "bare ValueError('document closed or encrypted') from pymupdf; upload_paper only catches "
+    "PDFError (app/routes/papers.py:77), so the user gets a 500 instead of a 400.",
+)
+def test_upload_password_protected_pdf_returns_400(client, session, fake_llm, upload_dir):
+    import pymupdf
+
+    doc = pymupdf.open()
+    doc.new_page().insert_text((72, 72), "Secret Title", fontsize=20)
+    data = doc.tobytes(encryption=pymupdf.PDF_ENCRYPT_AES_256, user_pw="user", owner_pw="owner")
+    doc.close()
+    r = upload(client, data)
+    assert r.status_code == 400
+    assert list(upload_dir.iterdir()) == []
+    assert session.exec(select(Paper)).all() == []
 
 
 # ---------------------------------------------------------------- stored PDF
@@ -339,7 +387,10 @@ def test_get_pdf_without_stored_pdf_404(client, add_paper):
 
 
 def test_get_pdf_unknown_paper_404(client):
-    assert client.get("/api/papers/424242/pdf").status_code == 404
+    r = client.get("/api/papers/424242/pdf")
+    assert r.status_code == 404
+    # The paper itself is missing, which is a different error from "paper has no PDF".
+    assert r.json() == {"detail": "Paper not found"}
 
 
 # ---------------------------------------------------------------- delete
@@ -367,20 +418,34 @@ def test_delete_removes_paper_chat_and_file(client, session, upload_dir, fake_ll
     assert [p["title"] for p in client.get("/api/papers").json()] == ["Keep me"]
 
 
-def test_delete_tolerates_missing_pdf_file(client, add_paper):
-    p = add_paper(pdf_path="already-gone.pdf")
-    assert client.delete(f"/api/papers/{p.id}").status_code == 204
-    assert client.get(f"/api/papers/{p.id}").status_code == 404
+def test_delete_tolerates_missing_pdf_file(client, session, add_paper):
+    pid = add_paper(pdf_path="already-gone.pdf").id
+    assert client.delete(f"/api/papers/{pid}").status_code == 204
+    session.expire_all()
+    assert session.get(Paper, pid) is None
 
 
-def test_delete_unknown_paper_404(client):
-    assert client.delete("/api/papers/31337").status_code == 404
+def test_delete_unknown_paper_404_changes_nothing(client, session, add_paper, upload_dir):
+    keep = add_paper(title="Keep me", pdf_path="keep.pdf")
+    (upload_dir / "keep.pdf").write_bytes(b"%PDF")
+    session.add(ChatMessage(paper_id=keep.id, role="user", content="q"))
+    session.commit()
+
+    r = client.delete("/api/papers/31337")
+    assert r.status_code == 404
+    assert r.json() == {"detail": "Paper not found"}
+    session.expire_all()
+    assert [p.title for p in session.exec(select(Paper)).all()] == ["Keep me"]
+    assert len(session.exec(select(ChatMessage)).all()) == 1
+    assert (upload_dir / "keep.pdf").exists()
 
 
 def test_delete_twice_second_is_404(client, add_paper):
     p = add_paper()
     assert client.delete(f"/api/papers/{p.id}").status_code == 204
-    assert client.delete(f"/api/papers/{p.id}").status_code == 404
+    r = client.delete(f"/api/papers/{p.id}")
+    assert r.status_code == 404
+    assert r.json() == {"detail": "Paper not found"}
 
 
 def test_deleted_search_result_can_be_saved_again(client):

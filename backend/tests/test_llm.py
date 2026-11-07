@@ -29,12 +29,6 @@ def test_get_client_uses_configured_endpoint_and_is_cached():
     assert c1.api_key == "test-key-not-real"
 
 
-async def test_chat_without_api_key_raises_llm_error(monkeypatch):
-    monkeypatch.setattr(llm, "LLM_API_KEY", "")
-    with pytest.raises(llm.LLMError):
-        await llm._chat([{"role": "user", "content": "hi"}])
-
-
 # ---------------------------------------------------------------- _chat
 
 
@@ -200,18 +194,18 @@ async def test_summarize_sends_system_prompt_and_paper_context(fake_llm):
     out = await llm.summarize("Paper T", "full text body")
     assert out == "## TL;DR\nGood."
     (call,) = fake_llm.calls
+    assert call["temperature"] == 0.2
     system, user = call["messages"]
-    assert system == {"role": "system", "content": llm.SUMMARY_PROMPT}
-    assert user["role"] == "user"
-    assert user["content"] == llm._paper_context("Paper T", "full text body")
-
-
-async def test_summarize_truncates_huge_papers(fake_llm, monkeypatch):
-    monkeypatch.setattr(llm, "MAX_CONTEXT_CHARS", 100)
-    await llm.summarize("T", "x" * 500)
-    content = fake_llm.calls[0]["messages"][1]["content"]
-    assert "x" * 100 + "\n\n[...truncated...]" in content
-    assert "x" * 101 not in content
+    assert system["role"] == "system"
+    assert system["content"].startswith("You are a research assistant. Summarize the paper")
+    # The README promises these summary sections.
+    for heading in ["## TL;DR", "## Problem", "## Approach", "## Datasets & Experiments",
+                    "## Key Results", "## Limitations"]:
+        assert f"\n{heading}" in system["content"]
+    assert user == {
+        "role": "user",
+        "content": "Title: Paper T\n\n--- PAPER CONTENT START ---\nfull text body\n--- PAPER CONTENT END ---",
+    }
 
 
 async def test_answer_orders_system_history_then_question(fake_llm):

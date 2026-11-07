@@ -1,0 +1,1380 @@
+{
+  "summary": {
+    "seed": 593,
+    "population": 424,
+    "sampled": 100,
+    "visible": {
+      "killed": 37,
+      "total": 50,
+      "score": 74.0
+    },
+    "held-out": {
+      "killed": 43,
+      "total": 50,
+      "score": 86.0
+    },
+    "all": {
+      "killed": 80,
+      "total": 100,
+      "score": 80.0
+    }
+  },
+  "results": [
+    {
+      "id": "A001",
+      "visibility": "visible",
+      "file": "backend/app/config.py",
+      "line": 7,
+      "kind": "stmt_to_pass",
+      "before": "load_dotenv(BACKEND_DIR / '.env')",
+      "after": "pass",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 10.8
+    },
+    {
+      "id": "A002",
+      "visibility": "held-out",
+      "file": "backend/app/config.py",
+      "line": 9,
+      "kind": "binop",
+      "before": "BACKEND_DIR / 'data'",
+      "after": "BACKEND_DIR * 'data'",
+      "status": "killed",
+      "killed_by": [],
+      "seconds": 1.9
+    },
+    {
+      "id": "A003",
+      "visibility": "visible",
+      "file": "backend/app/config.py",
+      "line": 9,
+      "kind": "constant",
+      "before": "'data'",
+      "after": "\"\"",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 10.6
+    },
+    {
+      "id": "A004",
+      "visibility": "held-out",
+      "file": "backend/app/config.py",
+      "line": 10,
+      "kind": "constant",
+      "before": "'uploads'",
+      "after": "\"\"",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 10.9
+    },
+    {
+      "id": "A005",
+      "visibility": "visible",
+      "file": "backend/app/config.py",
+      "line": 11,
+      "kind": "constant",
+      "before": "'papers.db'",
+      "after": "\"\"",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 14.6
+    },
+    {
+      "id": "A006",
+      "visibility": "held-out",
+      "file": "backend/app/config.py",
+      "line": 14,
+      "kind": "constant",
+      "before": "'LLM_API_KEY'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_search.py::test_health"
+      ],
+      "seconds": 6.3
+    },
+    {
+      "id": "A007",
+      "visibility": "visible",
+      "file": "backend/app/config.py",
+      "line": 15,
+      "kind": "constant",
+      "before": "'muse-spark-1.3'",
+      "after": "\"\"",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 14.2
+    },
+    {
+      "id": "A008",
+      "visibility": "held-out",
+      "file": "backend/app/config.py",
+      "line": 21,
+      "kind": "constant",
+      "before": "True",
+      "after": "False",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 13.4
+    },
+    {
+      "id": "A009",
+      "visibility": "visible",
+      "file": "backend/app/db.py",
+      "line": 13,
+      "kind": "stmt_to_pass",
+      "before": "SQLModel.metadata.create_all(engine)",
+      "after": "pass",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 13.4
+    },
+    {
+      "id": "A010",
+      "visibility": "held-out",
+      "file": "backend/app/db.py",
+      "line": 7,
+      "kind": "constant",
+      "before": "'check_same_thread'",
+      "after": "\"\"",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 13.2
+    },
+    {
+      "id": "A011",
+      "visibility": "visible",
+      "file": "backend/app/db.py",
+      "line": 7,
+      "kind": "constant",
+      "before": "False",
+      "after": "True",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 13.3
+    },
+    {
+      "id": "A012",
+      "visibility": "held-out",
+      "file": "backend/app/llm.py",
+      "line": 24,
+      "kind": "return_none",
+      "before": "return _client",
+      "after": "return None",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_llm.py::test_get_client_uses_configured_endpoint_and_is_cached"
+      ],
+      "seconds": 6.1
+    },
+    {
+      "id": "A013",
+      "visibility": "visible",
+      "file": "backend/app/llm.py",
+      "line": 60,
+      "kind": "return_none",
+      "before": "return {'title': (data.get('title') or '').strip() or None, 'authors': [str(a).strip() for",
+      "after": "return None",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_uses_llm_metadata"
+      ],
+      "seconds": 5.2
+    },
+    {
+      "id": "A014",
+      "visibility": "held-out",
+      "file": "backend/app/llm.py",
+      "line": 22,
+      "kind": "compare",
+      "before": "_client is None",
+      "after": "_client is not None",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_llm.py::test_get_client_uses_configured_endpoint_and_is_cached"
+      ],
+      "seconds": 6.4
+    },
+    {
+      "id": "A015",
+      "visibility": "visible",
+      "file": "backend/app/llm.py",
+      "line": 53,
+      "kind": "drop_not",
+      "before": "not m",
+      "after": "m",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_uses_llm_metadata"
+      ],
+      "seconds": 5.3
+    },
+    {
+      "id": "A016",
+      "visibility": "held-out",
+      "file": "backend/app/llm.py",
+      "line": 61,
+      "kind": "constant",
+      "before": "'title'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_uses_llm_metadata"
+      ],
+      "seconds": 5.3
+    },
+    {
+      "id": "A017",
+      "visibility": "visible",
+      "file": "backend/app/llm.py",
+      "line": 62,
+      "kind": "constant",
+      "before": "'authors'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_uses_llm_metadata"
+      ],
+      "seconds": 5.3
+    },
+    {
+      "id": "A018",
+      "visibility": "held-out",
+      "file": "backend/app/llm.py",
+      "line": 54,
+      "kind": "constant",
+      "before": "'LLM did not return JSON metadata'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_llm.py::test_extract_metadata_no_json_raises"
+      ],
+      "seconds": 6.0
+    },
+    {
+      "id": "A019",
+      "visibility": "visible",
+      "file": "backend/app/llm.py",
+      "line": 49,
+      "kind": "constant",
+      "before": "12000",
+      "after": "12001",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 13.4
+    },
+    {
+      "id": "A020",
+      "visibility": "held-out",
+      "file": "backend/app/llm.py",
+      "line": 82,
+      "kind": "constant",
+      "before": "'role'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_llm.py::test_summarize_sends_system_prompt_and_paper_context"
+      ],
+      "seconds": 6.0
+    },
+    {
+      "id": "A021",
+      "visibility": "visible",
+      "file": "backend/app/llm.py",
+      "line": 64,
+      "kind": "constant",
+      "before": "'abstract'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_uses_llm_metadata"
+      ],
+      "seconds": 5.3
+    },
+    {
+      "id": "A022",
+      "visibility": "held-out",
+      "file": "backend/app/main.py",
+      "line": 27,
+      "kind": "stmt_to_pass",
+      "before": "app.include_router(search.router)",
+      "after": "pass",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_search.py::test_search_returns_provider_and_results"
+      ],
+      "seconds": 5.9
+    },
+    {
+      "id": "A023",
+      "visibility": "visible",
+      "file": "backend/app/main.py",
+      "line": 34,
+      "kind": "return_none",
+      "before": "return {'status': 'ok', 'llm_model': LLM_MODEL, 'llm_configured': bool(LLM_API_KEY)}",
+      "after": "return None",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_search.py::test_health"
+      ],
+      "seconds": 6.1
+    },
+    {
+      "id": "A024",
+      "visibility": "held-out",
+      "file": "backend/app/main.py",
+      "line": 34,
+      "kind": "constant",
+      "before": "'llm_configured'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_search.py::test_health"
+      ],
+      "seconds": 6.0
+    },
+    {
+      "id": "A025",
+      "visibility": "visible",
+      "file": "backend/app/main.py",
+      "line": 23,
+      "kind": "constant",
+      "before": "'http://localhost:5173'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_search.py::test_cors_allows_vite_dev_origin"
+      ],
+      "seconds": 6.3
+    },
+    {
+      "id": "A026",
+      "visibility": "held-out",
+      "file": "backend/app/models.py",
+      "line": 49,
+      "kind": "constant",
+      "before": "True",
+      "after": "False",
+      "status": "killed",
+      "killed_by": [],
+      "seconds": 3.1
+    },
+    {
+      "id": "A027",
+      "visibility": "visible",
+      "file": "backend/app/models.py",
+      "line": 62,
+      "kind": "constant",
+      "before": "'pdf_path'",
+      "after": "\"\"",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 13.8
+    },
+    {
+      "id": "A028",
+      "visibility": "held-out",
+      "file": "backend/app/pdf.py",
+      "line": 21,
+      "kind": "return_none",
+      "before": "return r.content",
+      "after": "return None",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_save_downloads_pdf_and_extracts_full_text"
+      ],
+      "seconds": 4.6
+    },
+    {
+      "id": "A029",
+      "visibility": "visible",
+      "file": "backend/app/pdf.py",
+      "line": 35,
+      "kind": "constant",
+      "before": "'arXiv:([0-2]\\\\d)(?:0[1-9]|1[0-2])\\\\.\\\\d{4,5}'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_uses_llm_metadata"
+      ],
+      "seconds": 5.3
+    },
+    {
+      "id": "A030",
+      "visibility": "held-out",
+      "file": "backend/app/pdf.py",
+      "line": 83,
+      "kind": "constant",
+      "before": "'-\\\\n(?=[a-z])'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_pdf.py::test_clean_rejoins_hyphen_only_before_lowercase"
+      ],
+      "seconds": 7.2
+    },
+    {
+      "id": "A031",
+      "visibility": "visible",
+      "file": "backend/app/pdf.py",
+      "line": 55,
+      "kind": "constant",
+      "before": "2000",
+      "after": "2001",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_merges_llm_and_heuristic_metadata"
+      ],
+      "seconds": 5.5
+    },
+    {
+      "id": "A032",
+      "visibility": "held-out",
+      "file": "backend/app/pdf.py",
+      "line": 73,
+      "kind": "negate_cond",
+      "before": "if span['text'].strip() and (not span['text'].lstrip().startswith('arXiv:')):",
+      "after": "if not (span['text'].strip() and (not span['text'].lstrip().startswith('arXiv:'))):",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_falls_back_to_heuristics_when_llm_fails"
+      ],
+      "seconds": 5.5
+    },
+    {
+      "id": "A033",
+      "visibility": "visible",
+      "file": "backend/app/pdf.py",
+      "line": 51,
+      "kind": "constant",
+      "before": "'[;,]| and '",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_merges_llm_and_heuristic_metadata"
+      ],
+      "seconds": 5.3
+    },
+    {
+      "id": "A034",
+      "visibility": "held-out",
+      "file": "backend/app/pdf.py",
+      "line": 61,
+      "kind": "constant",
+      "before": "3000",
+      "after": "3001",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_pdf.py::test_heuristic_metadata_abstract_capped_at_3000_chars"
+      ],
+      "seconds": 7.4
+    },
+    {
+      "id": "A035",
+      "visibility": "visible",
+      "file": "backend/app/pdf.py",
+      "line": 84,
+      "kind": "constant",
+      "before": "'\\n\\n'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_pdf.py::test_clean_collapses_three_or_more_newlines_and_strips"
+      ],
+      "seconds": 7.2
+    },
+    {
+      "id": "A036",
+      "visibility": "held-out",
+      "file": "backend/app/pdf.py",
+      "line": 58,
+      "kind": "constant",
+      "before": "'creationDate'",
+      "after": "\"\"",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 13.3
+    },
+    {
+      "id": "A037",
+      "visibility": "visible",
+      "file": "backend/app/pdf.py",
+      "line": 70,
+      "kind": "constant",
+      "before": "0",
+      "after": "1",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_falls_back_to_heuristics_when_llm_fails"
+      ],
+      "seconds": 5.5
+    },
+    {
+      "id": "A038",
+      "visibility": "held-out",
+      "file": "backend/app/pdf.py",
+      "line": 46,
+      "kind": "constant",
+      "before": "'title'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_pdf.py::test_heuristic_metadata_prefers_embedded_metadata"
+      ],
+      "seconds": 7.3
+    },
+    {
+      "id": "A039",
+      "visibility": "visible",
+      "file": "backend/app/pdf.py",
+      "line": 59,
+      "kind": "constant",
+      "before": "1",
+      "after": "2",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 13.4
+    },
+    {
+      "id": "A040",
+      "visibility": "held-out",
+      "file": "backend/app/pdf.py",
+      "line": 70,
+      "kind": "constant",
+      "before": "'dir'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_pdf.py::test_heuristic_metadata_ignores_rotated_text_for_title"
+      ],
+      "seconds": 7.2
+    },
+    {
+      "id": "A041",
+      "visibility": "visible",
+      "file": "backend/app/pdf.py",
+      "line": 70,
+      "kind": "constant",
+      "before": "1",
+      "after": "2",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 12.9
+    },
+    {
+      "id": "A042",
+      "visibility": "held-out",
+      "file": "backend/app/pdf.py",
+      "line": 73,
+      "kind": "constant",
+      "before": "'arXiv:'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_falls_back_to_heuristics_when_llm_fails"
+      ],
+      "seconds": 5.4
+    },
+    {
+      "id": "A043",
+      "visibility": "visible",
+      "file": "backend/app/pdf.py",
+      "line": 73,
+      "kind": "constant",
+      "before": "'text'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_uses_llm_metadata"
+      ],
+      "seconds": 5.2
+    },
+    {
+      "id": "A044",
+      "visibility": "held-out",
+      "file": "backend/app/pdf.py",
+      "line": 74,
+      "kind": "constant",
+      "before": "'size'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_uses_llm_metadata"
+      ],
+      "seconds": 5.3
+    },
+    {
+      "id": "A045",
+      "visibility": "visible",
+      "file": "backend/app/pdf.py",
+      "line": 74,
+      "kind": "constant",
+      "before": "'text'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_uses_llm_metadata"
+      ],
+      "seconds": 5.1
+    },
+    {
+      "id": "A046",
+      "visibility": "held-out",
+      "file": "backend/app/routes/ai.py",
+      "line": 29,
+      "kind": "negate_cond",
+      "before": "if paper.summary and (not regenerate):",
+      "after": "if not (paper.summary and (not regenerate)):",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_summary_generated_from_full_text_and_persisted"
+      ],
+      "seconds": 3.3
+    },
+    {
+      "id": "A047",
+      "visibility": "visible",
+      "file": "backend/app/routes/ai.py",
+      "line": 43,
+      "kind": "return_none",
+      "before": "return session.exec(select(ChatMessage).where(ChatMessage.paper_id == paper_id).order_by(C",
+      "after": "return None",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_chat_history_initially_empty"
+      ],
+      "seconds": 3.5
+    },
+    {
+      "id": "A048",
+      "visibility": "held-out",
+      "file": "backend/app/routes/ai.py",
+      "line": 53,
+      "kind": "negate_cond",
+      "before": "if not question:",
+      "after": "if not not question:",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_ask_returns_and_persists_message_pair"
+      ],
+      "seconds": 3.6
+    },
+    {
+      "id": "A049",
+      "visibility": "visible",
+      "file": "backend/app/routes/ai.py",
+      "line": 66,
+      "kind": "stmt_to_pass",
+      "before": "session.commit()",
+      "after": "pass",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_ask_returns_and_persists_message_pair"
+      ],
+      "seconds": 3.5
+    },
+    {
+      "id": "A050",
+      "visibility": "held-out",
+      "file": "backend/app/routes/ai.py",
+      "line": 29,
+      "kind": "boolop",
+      "before": "paper.summary and (not regenerate)",
+      "after": "paper.summary or not regenerate",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_summary_generated_from_full_text_and_persisted"
+      ],
+      "seconds": 3.4
+    },
+    {
+      "id": "A051",
+      "visibility": "visible",
+      "file": "backend/app/routes/ai.py",
+      "line": 30,
+      "kind": "return_none",
+      "before": "return SummaryResponse(summary=paper.summary)",
+      "after": "return None",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_summary_is_cached"
+      ],
+      "seconds": 3.4
+    },
+    {
+      "id": "A052",
+      "visibility": "held-out",
+      "file": "backend/app/routes/ai.py",
+      "line": 26,
+      "kind": "constant",
+      "before": "'/{paper_id}/summary'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_summary_generated_from_full_text_and_persisted"
+      ],
+      "seconds": 3.4
+    },
+    {
+      "id": "A053",
+      "visibility": "visible",
+      "file": "backend/app/routes/ai.py",
+      "line": 48,
+      "kind": "constant",
+      "before": "'/{paper_id}/chat'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_ask_returns_and_persists_message_pair"
+      ],
+      "seconds": 3.5
+    },
+    {
+      "id": "A054",
+      "visibility": "held-out",
+      "file": "backend/app/routes/ai.py",
+      "line": 10,
+      "kind": "constant",
+      "before": "'/api/papers'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_summary_generated_from_full_text_and_persisted"
+      ],
+      "seconds": 3.3
+    },
+    {
+      "id": "A055",
+      "visibility": "visible",
+      "file": "backend/app/routes/ai.py",
+      "line": 29,
+      "kind": "drop_not",
+      "before": "not regenerate",
+      "after": "regenerate",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_summary_is_cached"
+      ],
+      "seconds": 3.4
+    },
+    {
+      "id": "A056",
+      "visibility": "held-out",
+      "file": "backend/app/routes/ai.py",
+      "line": 72,
+      "kind": "constant",
+      "before": "204",
+      "after": "205",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_clear_chat_only_affects_that_paper"
+      ],
+      "seconds": 3.6
+    },
+    {
+      "id": "A057",
+      "visibility": "visible",
+      "file": "backend/app/routes/ai.py",
+      "line": 10,
+      "kind": "constant",
+      "before": "'ai'",
+      "after": "\"\"",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 13.3
+    },
+    {
+      "id": "A058",
+      "visibility": "held-out",
+      "file": "backend/app/routes/ai.py",
+      "line": 54,
+      "kind": "constant",
+      "before": "400",
+      "after": "401",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_ask_empty_question_is_400"
+      ],
+      "seconds": 3.5
+    },
+    {
+      "id": "A059",
+      "visibility": "visible",
+      "file": "backend/app/routes/papers.py",
+      "line": 61,
+      "kind": "stmt_to_pass",
+      "before": "session.commit()",
+      "after": "pass",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_save_without_pdf_url_is_abstract_only"
+      ],
+      "seconds": 3.8
+    },
+    {
+      "id": "A060",
+      "visibility": "held-out",
+      "file": "backend/app/routes/papers.py",
+      "line": 63,
+      "kind": "return_none",
+      "before": "return to_read(paper)",
+      "after": "return None",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_save_without_pdf_url_is_abstract_only"
+      ],
+      "seconds": 3.8
+    },
+    {
+      "id": "A061",
+      "visibility": "visible",
+      "file": "backend/app/routes/papers.py",
+      "line": 71,
+      "kind": "negate_cond",
+      "before": "if len(data) > MAX_UPLOAD_BYTES:",
+      "after": "if not len(data) > MAX_UPLOAD_BYTES:",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_uses_llm_metadata"
+      ],
+      "seconds": 5.0
+    },
+    {
+      "id": "A062",
+      "visibility": "held-out",
+      "file": "backend/app/routes/papers.py",
+      "line": 94,
+      "kind": "stmt_to_pass",
+      "before": "session.add(paper)",
+      "after": "pass",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_uses_llm_metadata"
+      ],
+      "seconds": 5.0
+    },
+    {
+      "id": "A063",
+      "visibility": "visible",
+      "file": "backend/app/routes/papers.py",
+      "line": 97,
+      "kind": "return_none",
+      "before": "return to_read(paper)",
+      "after": "return None",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_uses_llm_metadata"
+      ],
+      "seconds": 4.9
+    },
+    {
+      "id": "A064",
+      "visibility": "held-out",
+      "file": "backend/app/routes/papers.py",
+      "line": 103,
+      "kind": "negate_cond",
+      "before": "if not paper.pdf_path:",
+      "after": "if not not paper.pdf_path:",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_get_pdf_serves_uploaded_file"
+      ],
+      "seconds": 5.6
+    },
+    {
+      "id": "A065",
+      "visibility": "visible",
+      "file": "backend/app/routes/papers.py",
+      "line": 111,
+      "kind": "stmt_to_pass",
+      "before": "session.exec(delete(ChatMessage).where(ChatMessage.paper_id == paper_id))",
+      "after": "pass",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_delete_removes_paper_chat_and_file"
+      ],
+      "seconds": 5.6
+    },
+    {
+      "id": "A066",
+      "visibility": "held-out",
+      "file": "backend/app/routes/papers.py",
+      "line": 22,
+      "kind": "drop_not",
+      "before": "not paper",
+      "after": "paper",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_ai.py::test_summary_generated_from_full_text_and_persisted"
+      ],
+      "seconds": 3.4
+    },
+    {
+      "id": "A067",
+      "visibility": "visible",
+      "file": "backend/app/routes/papers.py",
+      "line": 66,
+      "kind": "constant",
+      "before": "'/upload'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_upload_uses_llm_metadata"
+      ],
+      "seconds": 5.0
+    },
+    {
+      "id": "A068",
+      "visibility": "held-out",
+      "file": "backend/app/routes/papers.py",
+      "line": 32,
+      "kind": "constant",
+      "before": "'full'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_save_downloads_pdf_and_extracts_full_text"
+      ],
+      "seconds": 4.0
+    },
+    {
+      "id": "A069",
+      "visibility": "visible",
+      "file": "backend/app/routes/papers.py",
+      "line": 105,
+      "kind": "binop",
+      "before": "UPLOAD_DIR / paper.pdf_path",
+      "after": "UPLOAD_DIR * paper.pdf_path",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_get_pdf_serves_uploaded_file"
+      ],
+      "seconds": 5.6
+    },
+    {
+      "id": "A070",
+      "visibility": "held-out",
+      "file": "backend/app/routes/papers.py",
+      "line": 104,
+      "kind": "constant",
+      "before": "404",
+      "after": "405",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_get_pdf_without_stored_pdf_404"
+      ],
+      "seconds": 5.8
+    },
+    {
+      "id": "A071",
+      "visibility": "visible",
+      "file": "backend/app/routes/papers.py",
+      "line": 105,
+      "kind": "constant",
+      "before": "'application/pdf'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_get_pdf_serves_uploaded_file"
+      ],
+      "seconds": 5.6
+    },
+    {
+      "id": "A072",
+      "visibility": "held-out",
+      "file": "backend/app/routes/papers.py",
+      "line": 50,
+      "kind": "compare",
+      "before": "Paper.external_id == body.external_id",
+      "after": "Paper.external_id != body.external_id",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_api_papers.py::test_save_is_idempotent_by_external_id"
+      ],
+      "seconds": 5.1
+    },
+    {
+      "id": "A073",
+      "visibility": "visible",
+      "file": "backend/app/search.py",
+      "line": 17,
+      "kind": "constant",
+      "before": "'https://export.arxiv.org/api/query'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_arxiv_search_uses_and_query_first"
+      ],
+      "seconds": 9.7
+    },
+    {
+      "id": "A074",
+      "visibility": "held-out",
+      "file": "backend/app/search.py",
+      "line": 125,
+      "kind": "return_none",
+      "before": "return re.sub('\\\\s+', ' ', s).strip()",
+      "after": "return None",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_parse_arxiv_maps_entries"
+      ],
+      "seconds": 9.5
+    },
+    {
+      "id": "A075",
+      "visibility": "visible",
+      "file": "backend/app/search.py",
+      "line": 18,
+      "kind": "constant",
+      "before": "'a'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_parse_arxiv_maps_entries"
+      ],
+      "seconds": 10.1
+    },
+    {
+      "id": "A076",
+      "visibility": "held-out",
+      "file": "backend/app/search.py",
+      "line": 93,
+      "kind": "stmt_to_pass",
+      "before": "results.append(SearchResult(source='arxiv', external_id=f'arxiv:{arxiv_id}', title=_squash",
+      "after": "pass",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_parse_arxiv_maps_entries"
+      ],
+      "seconds": 9.7
+    },
+    {
+      "id": "A077",
+      "visibility": "visible",
+      "file": "backend/app/search.py",
+      "line": 108,
+      "kind": "constant",
+      "before": "'a'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_arxiv_query_builder[the"
+      ],
+      "seconds": 9.6
+    },
+    {
+      "id": "A078",
+      "visibility": "held-out",
+      "file": "backend/app/search.py",
+      "line": 108,
+      "kind": "constant",
+      "before": "'the'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_arxiv_query_builder[the"
+      ],
+      "seconds": 9.4
+    },
+    {
+      "id": "A079",
+      "visibility": "visible",
+      "file": "backend/app/search.py",
+      "line": 108,
+      "kind": "constant",
+      "before": "'are'",
+      "after": "\"\"",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 13.0
+    },
+    {
+      "id": "A080",
+      "visibility": "held-out",
+      "file": "backend/app/search.py",
+      "line": 108,
+      "kind": "constant",
+      "before": "'for'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_arxiv_query_builder[diffusion"
+      ],
+      "seconds": 9.5
+    },
+    {
+      "id": "A081",
+      "visibility": "visible",
+      "file": "backend/app/search.py",
+      "line": 108,
+      "kind": "constant",
+      "before": "'or'",
+      "after": "\"\"",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 13.5
+    },
+    {
+      "id": "A082",
+      "visibility": "held-out",
+      "file": "backend/app/search.py",
+      "line": 109,
+      "kind": "constant",
+      "before": "'as'",
+      "after": "\"\"",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 12.9
+    },
+    {
+      "id": "A083",
+      "visibility": "visible",
+      "file": "backend/app/search.py",
+      "line": 121,
+      "kind": "negate_cond",
+      "before": "(found.text or '').strip() if found is not None else ''",
+      "after": "(found.text or '').strip() if not found is not None else ''",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_parse_arxiv_maps_entries"
+      ],
+      "seconds": 9.8
+    },
+    {
+      "id": "A084",
+      "visibility": "held-out",
+      "file": "backend/app/search.py",
+      "line": 39,
+      "kind": "constant",
+      "before": "'limit'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_s2_maps_fields_and_sends_query_params"
+      ],
+      "seconds": 7.5
+    },
+    {
+      "id": "A085",
+      "visibility": "visible",
+      "file": "backend/app/search.py",
+      "line": 42,
+      "kind": "compare",
+      "before": "r.status_code == 429",
+      "after": "r.status_code != 429",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_s2_retries_once_after_429"
+      ],
+      "seconds": 21.8
+    },
+    {
+      "id": "A086",
+      "visibility": "held-out",
+      "file": "backend/app/search.py",
+      "line": 79,
+      "kind": "stmt_to_pass",
+      "before": "r.raise_for_status()",
+      "after": "pass",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_arxiv_search_http_error_raises"
+      ],
+      "seconds": 10.8
+    },
+    {
+      "id": "A087",
+      "visibility": "visible",
+      "file": "backend/app/search.py",
+      "line": 49,
+      "kind": "constant",
+      "before": "'ArXiv'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_s2_prefers_arxiv_id_and_derives_pdf_url"
+      ],
+      "seconds": 7.9
+    },
+    {
+      "id": "A088",
+      "visibility": "held-out",
+      "file": "backend/app/search.py",
+      "line": 72,
+      "kind": "constant",
+      "before": "'AND'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_arxiv_search_uses_and_query_first"
+      ],
+      "seconds": 10.1
+    },
+    {
+      "id": "A089",
+      "visibility": "visible",
+      "file": "backend/app/search.py",
+      "line": 90,
+      "kind": "constant",
+      "before": "'a:id'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_parse_arxiv_maps_entries"
+      ],
+      "seconds": 10.0
+    },
+    {
+      "id": "A090",
+      "visibility": "held-out",
+      "file": "backend/app/search.py",
+      "line": 40,
+      "kind": "constant",
+      "before": "15",
+      "after": "16",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 13.3
+    },
+    {
+      "id": "A091",
+      "visibility": "visible",
+      "file": "backend/app/search.py",
+      "line": 50,
+      "kind": "constant",
+      "before": "'url'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_s2_maps_fields_and_sends_query_params"
+      ],
+      "seconds": 7.8
+    },
+    {
+      "id": "A092",
+      "visibility": "held-out",
+      "file": "backend/app/search.py",
+      "line": 71,
+      "kind": "constant",
+      "before": "True",
+      "after": "False",
+      "status": "survived",
+      "killed_by": [],
+      "seconds": 13.4
+    },
+    {
+      "id": "A093",
+      "visibility": "visible",
+      "file": "backend/app/search.py",
+      "line": 76,
+      "kind": "constant",
+      "before": "'relevance'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_arxiv_search_uses_and_query_first"
+      ],
+      "seconds": 9.9
+    },
+    {
+      "id": "A094",
+      "visibility": "held-out",
+      "file": "backend/app/search.py",
+      "line": 58,
+      "kind": "boolop",
+      "before": "item.get('title') or '(untitled)'",
+      "after": "item.get('title') and '(untitled)'",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_s2_maps_fields_and_sends_query_params"
+      ],
+      "seconds": 7.3
+    },
+    {
+      "id": "A095",
+      "visibility": "visible",
+      "file": "backend/app/search.py",
+      "line": 91,
+      "kind": "constant",
+      "before": "'/abs/'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_parse_arxiv_maps_entries"
+      ],
+      "seconds": 9.6
+    },
+    {
+      "id": "A096",
+      "visibility": "held-out",
+      "file": "backend/app/search.py",
+      "line": 99,
+      "kind": "negate_cond",
+      "before": "int(published[:4]) if published[:4].isdigit() else None",
+      "after": "int(published[:4]) if not published[:4].isdigit() else None",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_parse_arxiv_maps_entries"
+      ],
+      "seconds": 9.7
+    },
+    {
+      "id": "A097",
+      "visibility": "visible",
+      "file": "backend/app/search.py",
+      "line": 50,
+      "kind": "constant",
+      "before": "'openAccessPdf'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_s2_maps_fields_and_sends_query_params"
+      ],
+      "seconds": 7.4
+    },
+    {
+      "id": "A098",
+      "visibility": "held-out",
+      "file": "backend/app/search.py",
+      "line": 100,
+      "kind": "constant",
+      "before": "'a:summary'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_parse_arxiv_maps_entries"
+      ],
+      "seconds": 9.8
+    },
+    {
+      "id": "A099",
+      "visibility": "visible",
+      "file": "backend/app/search.py",
+      "line": 98,
+      "kind": "constant",
+      "before": "'a:author'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_parse_arxiv_maps_entries"
+      ],
+      "seconds": 9.4
+    },
+    {
+      "id": "A100",
+      "visibility": "held-out",
+      "file": "backend/app/search.py",
+      "line": 57,
+      "kind": "constant",
+      "before": "'paperId'",
+      "after": "\"\"",
+      "status": "killed",
+      "killed_by": [
+        "tests/test_search.py::test_s2_maps_fields_and_sends_query_params"
+      ],
+      "seconds": 7.6
+    }
+  ]
+}

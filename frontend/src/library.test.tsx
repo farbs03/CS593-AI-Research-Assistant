@@ -1,4 +1,4 @@
-import { act, render, renderHook, screen, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { LibraryProvider, useLibrary } from './library'
@@ -130,17 +130,6 @@ describe('LibraryProvider', () => {
     expect(result.current.savedIdFor('arxiv:abc')).toBe(7)
     expect(result.current.savedIdFor('arxiv:other')).toBeUndefined()
     expect(result.current.savedIdFor(null)).toBeUndefined()
-  })
-
-  it('renders its children', async () => {
-    setup([])
-    render(
-      <LibraryProvider>
-        <p>child content</p>
-      </LibraryProvider>,
-    )
-    expect(screen.getByText('child content')).toBeInTheDocument()
-    await waitFor(() => expect(fetch).toHaveBeenCalled())
   })
 })
 

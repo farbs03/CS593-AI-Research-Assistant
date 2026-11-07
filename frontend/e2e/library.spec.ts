@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { makePdf, papers, resetLibrary } from './helpers'
+import { answerNextDialog, makePdf, papers, resetLibrary } from './helpers'
 
 test.beforeEach(async ({ request }) => {
   await resetLibrary(request)
@@ -68,15 +68,16 @@ test('filter the library and remove a paper', async ({ page, request }) => {
 
   // Dismissing the confirmation keeps the paper.
   const target = papers(page).filter({ hasText: 'Diffusion Policies' })
-  page.once('dialog', (d) => void d.dismiss())
+  const confirmText = 'Remove “Diffusion Policies” from your library? Its summary and Q&A history will be deleted.'
+  const dismissed = answerNextDialog(page, 'dismiss')
   await target.getByRole('button', { name: 'Remove' }).click()
+  await expect.poll(() => dismissed).toEqual([confirmText])
   await expect(papers(page)).toHaveCount(3)
+  expect(await (await request.get('/api/papers')).json()).toHaveLength(3) // nothing deleted server-side
 
-  page.once('dialog', (d) => {
-    expect(d.message()).toContain('Remove “Diffusion Policies” from your library?')
-    void d.accept()
-  })
+  const accepted = answerNextDialog(page, 'accept')
   await target.getByRole('button', { name: 'Remove' }).click()
+  await expect.poll(() => accepted).toEqual([confirmText])
   await expect(page.getByText('2 of 2 papers')).toBeVisible()
   await expect(page.getByRole('navigation', { name: 'Main' }).getByLabel('2 papers')).toBeVisible()
 

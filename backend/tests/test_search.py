@@ -1,6 +1,6 @@
 """Unit tests for app/search.py with Semantic Scholar and arXiv mocked by respx."""
 
-import asyncio
+from types import SimpleNamespace
 from urllib.parse import parse_qs, urlparse
 
 import httpx
@@ -42,12 +42,14 @@ def atom_feed(*entries):
 
 @pytest.fixture
 def no_sleep(monkeypatch):
+    """Records app.search's back-off sleeps without sleeping. Only app.search's view of asyncio
+    is replaced; the global asyncio.sleep (used by the event loop / anyio) is untouched."""
     slept = []
 
     async def fake_sleep(seconds, *a, **k):
         slept.append(seconds)
 
-    monkeypatch.setattr(asyncio, "sleep", fake_sleep)
+    monkeypatch.setattr(search, "asyncio", SimpleNamespace(sleep=fake_sleep))
     return slept
 
 
@@ -193,12 +195,24 @@ def test_parse_arxiv_empty_feed():
         ("diffusion models for video", "OR", "all:diffusion OR all:models OR all:video"),
         ("self-supervised learning", "AND", "all:self-supervised AND all:learning"),
         ("The Of And", "AND", "all:The AND all:Of AND all:And"),  # only stopwords: keep them all
-        ("C++ !!", "AND", "all:C"),
         ("???", "AND", "all:???"),
     ],
 )
 def test_arxiv_query_builder(query, conj, expected):
     assert search._arxiv_query(query, conj) == expected
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="APP BUG: _arxiv_query tokenizes with [\\w-]+ (app/search.py:114-115), which strips the "
+    "symbols from language/technology names, so 'C++' becomes all:C and 'C#' becomes all:C "
+    "(a search for the single letter C).",
+)
+@pytest.mark.parametrize(("query", "term"), [("C++ !!", "C++"), ("C# compilers", "C#")])
+def test_arxiv_query_keeps_symbols_that_are_part_of_a_term(query, term):
+    built = search._arxiv_query(query, "AND")
+    assert term in built
+    assert "!" not in built
 
 
 async def test_arxiv_search_uses_and_query_first():
@@ -269,12 +283,32 @@ async def test_search_papers_falls_back_on_s2_timeout():
     assert provider == "arxiv"
 
 
-async def test_search_papers_falls_back_on_malformed_s2_payload():
+async def test_search_papers_falls_back_when_s2_returns_non_json():
     with respx.mock() as mock:
-        mock.get(search.S2_URL).respond(200, json={"data": [{"title": "no paperId"}]})
+        mock.get(search.S2_URL).respond(200, text="<html>Service temporarily unavailable</html>")
         mock.get(search.ARXIV_URL).respond(200, text=atom_feed(atom_entry()))
-        _, provider = await search.search_papers("q", 3)
+        results, provider = await search.search_papers("q", 3)
     assert provider == "arxiv"
+    assert [r.external_id for r in results] == ["arxiv:1706.03762"]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="APP BUG: search_semantic_scholar indexes item['paperId'] (app/search.py:57), so ONE "
+    "S2 item without a paperId raises KeyError and search_papers throws away every valid S2 "
+    "result, silently switching the whole search to arXiv.",
+)
+async def test_one_malformed_s2_item_does_not_discard_the_other_results():
+    with respx.mock(assert_all_called=False) as mock:
+        mock.get(search.S2_URL).respond(
+            200, json={"data": [s2_item(paperId="good1", title="Good Paper"), {"title": "no paperId"}]}
+        )
+        arxiv = mock.get(search.ARXIV_URL).respond(200, text=atom_feed(atom_entry()))
+        results, provider = await search.search_papers("q", 3)
+    assert provider == "semantic_scholar"
+    assert not arxiv.called
+    assert results[0].title == "Good Paper"
+    assert results[0].external_id == "s2:good1"
 
 
 async def test_search_papers_raises_search_error_when_all_fail(no_sleep):
