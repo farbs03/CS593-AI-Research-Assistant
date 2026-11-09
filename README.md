@@ -2,7 +2,7 @@
 
 A web app for finding, organizing, and understanding research papers. Search public paper databases, save papers to a local library, upload your own PDFs, and use an LLM to summarize papers and answer questions about them, grounded in each paper's full text.
 
-Built for CS593 (Advanced Software Engineering) HW1 using Claude Code as the coding agent.
+Built for CS593-ASE HW1 using Claude Code (Opus 5.5) as the coding agent.
 
 ## Features
 
